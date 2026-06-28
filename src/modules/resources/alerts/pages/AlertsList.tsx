@@ -71,19 +71,6 @@ export default function AlertsList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Alerts</h1>
-          <p className="text-sm text-slate-500">Manage and view system alerts.</p>
-        </div>
-        <PermissionButton 
-          action="alerts:Create" 
-          onClick={() => setIsCreating(!isCreating)}
-        >
-          <Plus className="h-4 w-4 mr-2 inline" /> New Alert
-        </PermissionButton>
-      </div>
-
       <PageToolbar
         searchPlaceholder="Search Alerts..."
         searchValue={search}
@@ -91,6 +78,16 @@ export default function AlertsList() {
           setSearch(val);
           setPage(1);
         }}
+        primaryAction={
+          <PermissionButton
+            action="alerts:Create"
+            onClick={() => setIsCreating(!isCreating)}
+            tooltip="Create Alert"
+          >
+            <Plus className="h-4 w-4 mr-2 shrink-0" />
+            New Alert
+          </PermissionButton>
+        }
       />
 
       {isCreating && (

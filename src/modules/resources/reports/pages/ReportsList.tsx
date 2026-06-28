@@ -62,19 +62,6 @@ export default function ReportsList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
-          <p className="text-sm text-slate-500">Manage and view system reports.</p>
-        </div>
-        <PermissionButton 
-          action="reports:Create" 
-          onClick={() => setIsCreating(!isCreating)}
-        >
-          <Plus className="h-4 w-4 mr-2 inline" /> New Report
-        </PermissionButton>
-      </div>
-
       <PageToolbar
         searchPlaceholder="Search Reports..."
         searchValue={search}
@@ -82,6 +69,16 @@ export default function ReportsList() {
           setSearch(val);
           setPage(1);
         }}
+        primaryAction={
+          <PermissionButton
+            action="reports:Create"
+            onClick={() => setIsCreating(!isCreating)}
+            tooltip="Create Report"
+          >
+            <Plus className="h-4 w-4 mr-2 shrink-0" />
+            New Report
+          </PermissionButton>
+        }
       />
 
       {isCreating && (

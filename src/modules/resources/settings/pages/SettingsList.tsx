@@ -49,13 +49,6 @@ export default function SettingsList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Application Settings</h1>
-          <p className="text-sm text-slate-500">Manage system-wide configuration settings.</p>
-        </div>
-      </div>
-
       <PageToolbar
         searchPlaceholder="Search Settings..."
         searchValue={search}
@@ -64,6 +57,7 @@ export default function SettingsList() {
           setPage(1);
         }}
       />
+
 
       <DataTable
         data={paginatedSettings}

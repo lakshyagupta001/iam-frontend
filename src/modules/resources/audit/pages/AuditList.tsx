@@ -29,13 +29,6 @@ export default function AuditList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Audit Logs</h1>
-          <p className="text-sm text-slate-500">Track and monitor all activities within your organization.</p>
-        </div>
-      </div>
-
       <PageToolbar
         searchPlaceholder="Search by action or user..."
         searchValue={search}
@@ -44,6 +37,7 @@ export default function AuditList() {
           setPage(1);
         }}
       />
+
 
       <DataTable
         data={paginatedLogs}
