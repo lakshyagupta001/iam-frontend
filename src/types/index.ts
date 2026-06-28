@@ -62,3 +62,11 @@ export interface GroupDetails extends Group {
   memberships: { user: UserProfile }[];
   policyAttachments: { policy: Policy }[];
 }
+
+export interface UserBoundary {
+  userId: string;
+  policyId: string;
+  policy: Policy;
+  createdAt: string;
+  updatedAt: string;
+}

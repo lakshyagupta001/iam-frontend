@@ -3,6 +3,7 @@ import { Users, Shield, Key, Menu } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Sheet, SheetContent } from '../ui/sheet';
 import { Button } from '../ui/button';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../ui/tooltip';
 
 const navItems = [
   { name: 'Users', path: '/iam/users', icon: Users },
@@ -60,9 +61,14 @@ export function Sidebar({ isCollapsed, isMobileOpen, onMobileClose, onToggle }: 
             "flex h-16 items-center border-b transition-all duration-300 overflow-hidden",
             isCollapsed ? "justify-center px-0" : "px-4"
           )}>
-            <Button variant="ghost" size="icon" onClick={onToggle} className="shrink-0">
-              <Menu className="h-5 w-5" />
-            </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" onClick={onToggle} className="shrink-0">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Toggle Sidebar</TooltipContent>
+          </Tooltip>
             {!isCollapsed && (
               <div className="flex items-center gap-2 whitespace-nowrap text-slate-900 dark:text-white ml-2">
                 <Shield className="h-6 w-6 shrink-0" />

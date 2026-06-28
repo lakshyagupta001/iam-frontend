@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usersApi } from '../../../api/users.api';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
-import { UserPlus, Loader2 } from 'lucide-react';
+import { UserPlus, Loader2, UserCog } from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -42,18 +42,19 @@ export default function UsersList() {
       setName('');
       setEmail('');
       setPassword('');
-      toast.success('User created successfully');
+      toast.success('User created successfully', { id: 'user-create-success' });
     },
     onError: (error) => {
       if (axios.isAxiosError(error)) {
+        if (error.response?.status === 403) return;
         const errorData = error.response?.data;
         if (errorData?.errors && Array.isArray(errorData.errors)) {
-          toast.error(errorData.errors[0]?.message || 'Validation failed');
+          toast.error(errorData.errors[0]?.message || 'Validation failed', { id: 'user-create-error' });
         } else {
-          toast.error(errorData?.message || 'Failed to create user');
+          toast.error(errorData?.message || 'Failed to create user', { id: 'user-create-error' });
         }
       } else {
-        toast.error('An unexpected error occurred');
+        toast.error('An unexpected error occurred', { id: 'user-create-error' });
       }
     }
   });
@@ -148,6 +149,10 @@ export default function UsersList() {
               <DataTableRowActions
                 onView={() => navigate(`/iam/users/${u.id}`)}
                 onEdit={() => navigate(`/iam/users/${u.id}/edit`)}
+                viewAction="iam:GetUser"
+                editAction="iam:GetUser"
+                editIcon={<UserCog className="h-4 w-4" />}
+                editLabel="Manage Access"
               />
             ),
           }

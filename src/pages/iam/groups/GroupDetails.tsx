@@ -5,6 +5,7 @@ import { Button } from '../../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../../components/ui/card';
 import { Loader2, ArrowLeft, Shield, Users as UsersIcon } from 'lucide-react';
 import { DataTable } from '../../../components/ui/data-table';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../../../components/ui/tooltip';
 
 export default function GroupDetails() {
   const { id } = useParams<{ id: string }>();
@@ -35,9 +36,14 @@ export default function GroupDetails() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/iam/groups')}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" onClick={() => navigate('/iam/groups')}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Back to Groups</TooltipContent>
+          </Tooltip>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">{group.name}</h1>
             <p className="text-sm text-slate-500">{group.description || 'No description provided'}</p>

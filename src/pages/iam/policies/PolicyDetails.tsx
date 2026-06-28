@@ -4,7 +4,8 @@ import { policiesApi } from '../../../api/policies.api';
 import { Button } from '../../../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../../components/ui/card';
 import { Badge } from '../../../components/ui/badge';
-import { Loader2, ArrowLeft, Shield, FileJson } from 'lucide-react';
+import { Loader2, ArrowLeft, FileJson, Shield } from 'lucide-react';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../../../components/ui/tooltip';
 
 export default function PolicyDetails() {
   const { id } = useParams<{ id: string }>();
@@ -31,9 +32,14 @@ export default function PolicyDetails() {
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/iam/policies')}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" onClick={() => navigate('/iam/policies')}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Back to Policies</TooltipContent>
+        </Tooltip>
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{policy.name}</h1>
           <p className="text-sm text-slate-500">{policy.description || 'No description provided'}</p>

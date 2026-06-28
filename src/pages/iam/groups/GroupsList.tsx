@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { PageToolbar } from '../../../components/ui/page-toolbar';
-import { PrimaryButton } from '../../../components/ui/primary-button';
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { groupsApi } from '../../../api/groups.api';
@@ -13,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../..
 
 import { DataTable } from '../../../components/ui/data-table';
 import { DataTableRowActions } from '../../../components/ui/data-table-actions';
+import { PermissionButton } from '../../../components/iam/PermissionButton';
 
 export default function GroupsList() {
   const navigate = useNavigate();
@@ -33,45 +33,36 @@ export default function GroupsList() {
 
   const createMutation = useMutation({
     mutationFn: groupsApi.createGroup,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['groups'] });
-      setIsCreating(false);
-      setName('');
-      setDescription('');
-      toast.success('Group created successfully');
-    },
-    onError: (error) => {
-      if (axios.isAxiosError(error)) {
-        const errorData = error.response?.data;
-        if (errorData?.errors && Array.isArray(errorData.errors)) {
-          toast.error(errorData.errors[0]?.message || 'Validation failed');
-        } else {
-          toast.error(errorData?.message || 'Failed to create group');
-        }
-      } else {
-        toast.error('An unexpected error occurred');
-      }
-    }
   });
 
   const deleteMutation = useMutation({
     mutationFn: groupsApi.deleteGroup,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['groups'] });
-      toast.success('Group deleted successfully');
-    },
-    onError: (error) => {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message || 'Failed to delete group');
-      } else {
-        toast.error('An unexpected error occurred');
-      }
-    }
   });
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    createMutation.mutate({ name, description });
+    createMutation.mutate({ name, description }, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['groups'] });
+        setIsCreating(false);
+        setName('');
+        setDescription('');
+        toast.success('Group created successfully', { id: 'group-create-success' });
+      },
+      onError: (error) => {
+        if (axios.isAxiosError(error)) {
+          if (error.response?.status === 403) return;
+          const errorData = error.response?.data;
+          if (errorData?.errors && Array.isArray(errorData.errors)) {
+            toast.error(errorData.errors[0]?.message || 'Validation failed', { id: 'group-create-error' });
+          } else {
+            toast.error(errorData?.message || 'Failed to create group', { id: 'group-create-error' });
+          }
+        } else {
+          toast.error('An unexpected error occurred', { id: 'group-create-error' });
+        }
+      }
+    });
   };
 
   const groups = paginatedData?.data || [];
@@ -87,9 +78,10 @@ export default function GroupsList() {
           setPage(1);
         }}
         primaryAction={
-          <PrimaryButton onClick={() => setIsCreating(!isCreating)} icon={Plus}>
+          <PermissionButton action="iam:CreateGroup" onClick={() => setIsCreating(!isCreating)} tooltip="Create Group">
+            <Plus className="h-4 w-4 mr-2 shrink-0" />
             New Group
-          </PrimaryButton>
+          </PermissionButton>
         }
       />
 
@@ -152,11 +144,27 @@ export default function GroupsList() {
             header: "Actions",
             cell: (g) => (
               <DataTableRowActions
+                viewAction="iam:GetGroup"
+                editAction="iam:UpdateGroup"
+                deleteAction="iam:DeleteGroup"
                 onView={() => navigate(`/iam/groups/${g.id}`)}
                 onEdit={() => navigate(`/iam/groups/${g.id}/edit`)}
                 onDelete={() => {
                   if (window.confirm('Are you sure you want to delete this group?')) {
-                    deleteMutation.mutate(g.id);
+                    deleteMutation.mutate(g.id, {
+                      onSuccess: () => {
+                        queryClient.invalidateQueries({ queryKey: ['groups'] });
+                        toast.success('Group deleted successfully', { id: 'group-delete-success' });
+                      },
+                      onError: (error) => {
+                        if (axios.isAxiosError(error)) {
+                          if (error.response?.status === 403) return;
+                          toast.error(error.response?.data?.message || 'Failed to delete group', { id: 'group-delete-error' });
+                        } else {
+                          toast.error('An unexpected error occurred', { id: 'group-delete-error' });
+                        }
+                      }
+                    });
                   }
                 }}
               />

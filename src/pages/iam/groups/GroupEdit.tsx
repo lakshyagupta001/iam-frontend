@@ -7,6 +7,7 @@ import { groupsApi } from '../../../api/groups.api';
 import { usersApi } from '../../../api/users.api';
 import { policiesApi } from '../../../api/policies.api';
 import { Button } from '../../../components/ui/button';
+import { PermissionButton } from '../../../components/iam/PermissionButton';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../../components/ui/card';
 import { Loader2, ArrowLeft, Shield, Users as UsersIcon, Plus, Edit2 } from 'lucide-react';
 import {
@@ -21,6 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Input } from '../../../components/ui/input';
 import { DataTable } from '../../../components/ui/data-table';
 import { DataTableRowActions } from '../../../components/ui/data-table-actions';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../../../components/ui/tooltip';
 
 export default function GroupEdit() {
   const { id } = useParams<{ id: string }>();
@@ -61,6 +63,7 @@ export default function GroupEdit() {
     },
     onError: (error) => {
       if (axios.isAxiosError(error)) {
+        if (error.response?.status === 403) return;
         const errorData = error.response?.data;
         if (errorData?.errors && Array.isArray(errorData.errors)) {
           toast.error(errorData.errors[0]?.message || 'Validation failed');
@@ -83,6 +86,7 @@ export default function GroupEdit() {
     },
     onError: (error) => {
       if (axios.isAxiosError(error)) {
+        if (error.response?.status === 403) return;
         toast.error(error.response?.data?.message || 'Failed to add user to group');
       } else {
         toast.error('An unexpected error occurred');
@@ -98,6 +102,7 @@ export default function GroupEdit() {
     },
     onError: (error) => {
       if (axios.isAxiosError(error)) {
+        if (error.response?.status === 403) return;
         toast.error(error.response?.data?.message || 'Failed to remove user');
       } else {
         toast.error('An unexpected error occurred');
@@ -115,6 +120,7 @@ export default function GroupEdit() {
     },
     onError: (error) => {
       if (axios.isAxiosError(error)) {
+        if (error.response?.status === 403) return;
         toast.error(error.response?.data?.message || 'Failed to attach policy');
       } else {
         toast.error('An unexpected error occurred');
@@ -130,6 +136,7 @@ export default function GroupEdit() {
     },
     onError: (error) => {
       if (axios.isAxiosError(error)) {
+        if (error.response?.status === 403) return;
         toast.error(error.response?.data?.message || 'Failed to detach policy');
       } else {
         toast.error('An unexpected error occurred');
@@ -170,9 +177,14 @@ export default function GroupEdit() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/iam/groups')}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon" onClick={() => navigate('/iam/groups')}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Back to Groups</TooltipContent>
+          </Tooltip>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">{group.name}</h1>
             <p className="text-sm text-slate-500">{group.description || 'No description provided'}</p>
@@ -181,9 +193,9 @@ export default function GroupEdit() {
         <div className="flex space-x-2">
           <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
             <DialogTrigger asChild>
-              <Button variant="outline" onClick={openEditDialog}>
+              <PermissionButton action="iam:UpdateGroup" variant="outline" onClick={openEditDialog} tooltip="Edit Group">
                 <Edit2 className="h-4 w-4 mr-2" /> Edit Group
-              </Button>
+              </PermissionButton>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -201,10 +213,10 @@ export default function GroupEdit() {
                 </div>
                 <div className="flex justify-end pt-2">
                   <Button type="button" variant="ghost" className="mr-2" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-                  <Button type="submit" disabled={updateGroupMutation.isPending}>
+                  <PermissionButton action="iam:UpdateGroup" type="submit" disabled={updateGroupMutation.isPending} tooltip="Save Group">
                     {updateGroupMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                     Save Changes
-                  </Button>
+                  </PermissionButton>
                 </div>
               </form>
             </DialogContent>
@@ -225,9 +237,9 @@ export default function GroupEdit() {
 
             <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" variant="outline">
+                <PermissionButton action="iam:AddGroupMember" size="sm" variant="outline" tooltip="Add Member">
                   <Plus className="h-4 w-4 mr-2" /> Add Member
-                </Button>
+                </PermissionButton>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
@@ -253,13 +265,15 @@ export default function GroupEdit() {
                 </div>
                 <div className="flex justify-end space-x-2">
                   <Button variant="ghost" onClick={() => setIsUserDialogOpen(false)}>Cancel</Button>
-                  <Button
+                  <PermissionButton
+                    action="iam:AddGroupMember"
                     onClick={() => addUserMutation.mutate(selectedUser)}
                     disabled={!selectedUser || addUserMutation.isPending}
+                    tooltip="Add Member"
                   >
                     {addUserMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Add
-                  </Button>
+                  </PermissionButton>
                 </div>
               </DialogContent>
             </Dialog>
@@ -282,6 +296,7 @@ export default function GroupEdit() {
                   header: "Actions",
                   cell: (u) => (
                     <DataTableRowActions
+                      deleteAction="iam:RemoveGroupMember"
                       onDelete={() => removeUserMutation.mutate(u.id)}
                     />
                   ),
@@ -303,9 +318,9 @@ export default function GroupEdit() {
 
             <Dialog open={isPolicyDialogOpen} onOpenChange={setIsPolicyDialogOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" variant="outline">
+                <PermissionButton action="iam:AttachGroupPolicy" size="sm" variant="outline" tooltip="Attach Policy">
                   <Plus className="h-4 w-4 mr-2" /> Attach Policy
-                </Button>
+                </PermissionButton>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
@@ -331,13 +346,15 @@ export default function GroupEdit() {
                 </div>
                 <div className="flex justify-end space-x-2">
                   <Button variant="ghost" onClick={() => setIsPolicyDialogOpen(false)}>Cancel</Button>
-                  <Button
+                  <PermissionButton
+                    action="iam:AttachGroupPolicy"
                     onClick={() => attachPolicyMutation.mutate(selectedPolicy)}
                     disabled={!selectedPolicy || attachPolicyMutation.isPending}
+                    tooltip="Attach Policy"
                   >
                     {attachPolicyMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Attach
-                  </Button>
+                  </PermissionButton>
                 </div>
               </DialogContent>
             </Dialog>
@@ -360,6 +377,7 @@ export default function GroupEdit() {
                   header: "Actions",
                   cell: (p) => (
                     <DataTableRowActions
+                      deleteAction="iam:DetachGroupPolicy"
                       onDelete={() => detachPolicyMutation.mutate(p.id)}
                     />
                   ),

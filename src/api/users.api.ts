@@ -29,4 +29,18 @@ export const usersApi = {
     const { data } = await axiosClient.get<{ success: boolean; data: Record<string, boolean> }>(`/iam/users/${userId}/effective-permissions`);
     return data.data;
   },
+
+  getBoundary: async (userId: string): Promise<any | null> => {
+    const { data } = await axiosClient.get<{ success: boolean; data: any }>(`/iam/users/${userId}/boundary`);
+    return data.data;
+  },
+
+  assignBoundary: async (userId: string, policyId: string): Promise<any> => {
+    const { data } = await axiosClient.put<{ success: boolean; data: any }>(`/iam/users/${userId}/boundary`, { policyId });
+    return data.data;
+  },
+
+  removeBoundary: async (userId: string): Promise<void> => {
+    await axiosClient.delete(`/iam/users/${userId}/boundary`);
+  }
 };

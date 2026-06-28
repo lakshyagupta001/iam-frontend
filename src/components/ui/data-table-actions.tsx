@@ -1,78 +1,79 @@
-import { Button } from "./button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
+import { PermissionButton } from "../iam/PermissionButton";
 import { Eye, Edit2, Trash2 } from "lucide-react";
 
 interface DataTableRowActionsProps {
   onView?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  // Let the caller specify the exact action needed, since it depends on the entity
+  viewAction?: string;
+  editAction?: string;
+  deleteAction?: string;
+  editIcon?: React.ReactNode;
+  editLabel?: string;
 }
 
 export function DataTableRowActions({
   onView,
   onEdit,
   onDelete,
+  viewAction = "iam:GetResource", // Default or generic fallback
+  editAction = "iam:UpdateResource",
+  deleteAction = "iam:DeleteResource",
+  editIcon,
+  editLabel = "Edit",
 }: DataTableRowActionsProps) {
   return (
     <div className="flex items-center gap-1">
       {onView && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 rounded-md text-slate-500 hover:text-slate-900 dark:hover:text-slate-50"
-              onClick={(e) => {
-                e.stopPropagation();
-                onView();
-              }}
-              aria-label="View details"
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>View</TooltipContent>
-        </Tooltip>
+        <PermissionButton
+          action={viewAction}
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-md text-slate-500 hover:text-slate-900 dark:hover:text-slate-50"
+          onClick={(e) => {
+            e.stopPropagation();
+            onView();
+          }}
+          aria-label="View"
+          tooltip="View"
+        >
+          <Eye className="h-4 w-4" />
+        </PermissionButton>
       )}
 
       {onEdit && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 rounded-md text-slate-500 hover:text-slate-900 dark:hover:text-slate-50"
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit();
-              }}
-              aria-label="Edit"
-            >
-              <Edit2 className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Edit</TooltipContent>
-        </Tooltip>
+        <PermissionButton
+          action={editAction}
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-md text-slate-500 hover:text-slate-900 dark:hover:text-slate-50"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
+          aria-label={editLabel}
+          tooltip={editLabel}
+        >
+          {editIcon ? editIcon : <Edit2 className="h-4 w-4" />}
+        </PermissionButton>
       )}
 
       {onDelete && (
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              aria-label="Delete"
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Delete</TooltipContent>
-        </Tooltip>
+        <PermissionButton
+          action={deleteAction}
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          aria-label="Delete"
+          tooltip="Delete"
+        >
+          <Trash2 className="h-4 w-4" />
+        </PermissionButton>
       )}
     </div>
   );

@@ -4,10 +4,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { policiesApi } from '../../../api/policies.api';
 import { Button } from '../../../components/ui/button';
+import { PermissionButton } from '../../../components/iam/PermissionButton';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../../../components/ui/card';
 import { Loader2, ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { Input } from '../../../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select';
+import { Tooltip, TooltipTrigger, TooltipContent } from '../../../components/ui/tooltip';
 import type { PolicyStatement } from '../../../types';
 import axios from 'axios';
 
@@ -46,6 +48,7 @@ export default function PolicyEdit() {
     },
     onError: (error) => {
       if (axios.isAxiosError(error)) {
+        if (error.response?.status === 403) return;
         const errorData = error.response?.data;
         if (errorData?.errors && Array.isArray(errorData.errors)) {
           toast.error(errorData.errors[0]?.message || 'Validation failed. Check the form.');
@@ -100,9 +103,14 @@ export default function PolicyEdit() {
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/iam/policies')}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" onClick={() => navigate('/iam/policies')}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Back to Policies</TooltipContent>
+        </Tooltip>
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Edit Policy</h1>
           <p className="text-sm text-slate-500">Modify access rules and permissions.</p>
@@ -155,15 +163,20 @@ export default function PolicyEdit() {
             {statements.map((stmt, index) => (
               <div key={index} className="p-4 border rounded-lg bg-slate-50 relative group dark:bg-slate-900">
                 {statements.length > 1 && (
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="icon" 
-                    className="absolute top-2 right-2 text-red-500 hover:text-red-600 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => removeStatement(index)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="icon" 
+                        className="absolute top-2 right-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/50 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeStatement(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Remove Statement</TooltipContent>
+                  </Tooltip>
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
@@ -194,10 +207,10 @@ export default function PolicyEdit() {
 
         <div className="flex justify-end space-x-4">
           <Button type="button" variant="ghost" onClick={() => navigate('/iam/policies')}>Cancel</Button>
-          <Button type="submit" disabled={updateMutation.isPending}>
-            {updateMutation.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            Update Policy
-          </Button>
+          <PermissionButton action="iam:UpdatePolicy" type="submit" disabled={updateMutation.isPending} tooltip="Save Policy">
+            {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Save Changes
+          </PermissionButton>
         </div>
       </form>
     </div>

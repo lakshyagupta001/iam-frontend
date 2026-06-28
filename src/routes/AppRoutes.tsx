@@ -10,7 +10,6 @@ import GroupsList from '../pages/iam/groups/GroupsList';
 import GroupDetails from '../pages/iam/groups/GroupDetails';
 import GroupEdit from '../pages/iam/groups/GroupEdit';
 import PoliciesList from '../pages/iam/policies/PoliciesList';
-import PolicyCreate from '../pages/iam/policies/PolicyCreate';
 import PolicyDetails from '../pages/iam/policies/PolicyDetails';
 import PolicyEdit from '../pages/iam/policies/PolicyEdit';
 import { Loader2 } from 'lucide-react';
@@ -52,7 +51,6 @@ export function AppRoutes() {
 
         {/* Policies */}
         <Route path="policies" element={<PoliciesList />} />
-        <Route path="policies/new" element={<PolicyCreate />} />
         <Route path="policies/:id" element={<PolicyDetails />} />
         <Route path="policies/:id/edit" element={<PolicyEdit />} />
       </Route>
