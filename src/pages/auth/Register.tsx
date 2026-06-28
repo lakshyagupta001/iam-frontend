@@ -8,11 +8,16 @@ export default function Register() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4 sm:p-8">
       <div className="w-full max-w-md space-y-6">
         {/* Brand Logo & Name */}
-        <div className="flex flex-col items-center justify-center space-y-2 mb-8">
-          <div className="h-12 w-12 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20">
-            <Shield className="text-white h-7 w-7" />
+        <div className="flex flex-col items-center space-y-2 text-center mb-8">
+          <div className="h-12 w-12 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg shadow-slate-900/20">
+            <Shield className="text-white h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">VestAuth</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 mt-4">
+            IAM Console
+          </h1>
+          <p className="text-sm text-slate-500">
+            Enterprise Identity & Access Management
+          </p>
         </div>
 
         {/* Auth Card */}

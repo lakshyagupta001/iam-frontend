@@ -2,12 +2,21 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
-import Dashboard from '../pages/dashboard/Dashboard';
-import UsersList from '../pages/dashboard/UsersList';
+import { DashboardLayout } from '../components/layout/DashboardLayout';
+import UsersList from '../pages/iam/users/UsersList';
+import UserDetails from '../pages/iam/users/UserDetails';
+import UserEdit from '../pages/iam/users/UserEdit';
+import GroupsList from '../pages/iam/groups/GroupsList';
+import GroupDetails from '../pages/iam/groups/GroupDetails';
+import GroupEdit from '../pages/iam/groups/GroupEdit';
+import PoliciesList from '../pages/iam/policies/PoliciesList';
+import PolicyCreate from '../pages/iam/policies/PolicyCreate';
+import PolicyDetails from '../pages/iam/policies/PolicyDetails';
+import PolicyEdit from '../pages/iam/policies/PolicyEdit';
 import { Loader2 } from 'lucide-react';
 
 export function AppRoutes() {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -19,26 +28,39 @@ export function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
-      <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} />
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/iam/users" replace /> : <Login />} />
+      <Route path="/register" element={isAuthenticated ? <Navigate to="/iam/users" replace /> : <Register />} />
+
+      {/* Protected IAM Routes */}
       <Route
-        path="/dashboard"
+        path="/iam"
         element={
-          isAuthenticated ? <Dashboard /> : <Navigate to="/login" replace />
+          isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" replace />
         }
-      />
-      <Route
-        path="/users"
-        element={
-          isAuthenticated ? (
-            user?.isRoot ? <UsersList /> : <Navigate to="/dashboard" replace />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      >
+        <Route index element={<Navigate to="users" replace />} />
+
+        {/* Users */}
+        <Route path="users" element={<UsersList />} />
+        <Route path="users/:id" element={<UserDetails />} />
+        <Route path="users/:id/edit" element={<UserEdit />} />
+
+        {/* Groups */}
+        <Route path="groups" element={<GroupsList />} />
+        <Route path="groups/:id" element={<GroupDetails />} />
+        <Route path="groups/:id/edit" element={<GroupEdit />} />
+
+        {/* Policies */}
+        <Route path="policies" element={<PoliciesList />} />
+        <Route path="policies/new" element={<PolicyCreate />} />
+        <Route path="policies/:id" element={<PolicyDetails />} />
+        <Route path="policies/:id/edit" element={<PolicyEdit />} />
+      </Route>
+
+      {/* Redirects */}
+      <Route path="/dashboard" element={<Navigate to="/iam/users" replace />} />
+      <Route path="/" element={<Navigate to="/iam/users" replace />} />
+      <Route path="*" element={<Navigate to="/iam/users" replace />} />
     </Routes>
   );
 }

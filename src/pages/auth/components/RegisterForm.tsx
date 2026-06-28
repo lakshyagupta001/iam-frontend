@@ -158,12 +158,12 @@ export function RegisterForm() {
           </button>
         </div>
         
-        <div className="pt-2 grid grid-cols-2 gap-1.5">
-          <PasswordRequirement met={hasLength} text="8+ characters" />
-          <PasswordRequirement met={hasUpper} text="Uppercase letter" />
-          <PasswordRequirement met={hasLower} text="Lowercase letter" />
+        <div className="pt-2 flex flex-wrap gap-x-4 gap-y-1">
+          <PasswordRequirement met={hasLength} text="8+" />
+          <PasswordRequirement met={hasUpper} text="Upper" />
+          <PasswordRequirement met={hasLower} text="Lower" />
           <PasswordRequirement met={hasNumber} text="Number" />
-          <PasswordRequirement met={hasSpecial} text="Special character" />
+          <PasswordRequirement met={hasSpecial} text="Special" />
         </div>
       </div>
 

@@ -4,6 +4,7 @@ import { authApi } from '../api/auth.api';
 import type { UserProfile } from '../api/auth.api';
 import { axiosClient } from '../api/axiosClient';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -85,6 +86,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             return Promise.reject(refreshError);
           }
         }
+        
+        if (error.response?.status === 403) {
+          toast.error('Access Denied', {
+            description: 'You do not have permission to perform this action.'
+          });
+        }
+        
         return Promise.reject(error);
       }
     );
