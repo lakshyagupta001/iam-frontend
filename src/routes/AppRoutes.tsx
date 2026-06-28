@@ -1,18 +1,26 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import Login from '../pages/auth/Login';
-import Register from '../pages/auth/Register';
-import { DashboardLayout } from '../components/layout/DashboardLayout';
-import UsersList from '../pages/iam/users/UsersList';
-import UserDetails from '../pages/iam/users/UserDetails';
-import UserEdit from '../pages/iam/users/UserEdit';
-import GroupsList from '../pages/iam/groups/GroupsList';
-import GroupDetails from '../pages/iam/groups/GroupDetails';
-import GroupEdit from '../pages/iam/groups/GroupEdit';
-import PoliciesList from '../pages/iam/policies/PoliciesList';
-import PolicyDetails from '../pages/iam/policies/PolicyDetails';
-import PolicyEdit from '../pages/iam/policies/PolicyEdit';
+import { useAuth } from '@/modules/auth/hooks/useAuth';
+import Login from '@/modules/auth/pages/Login';
+import Register from '@/modules/auth/pages/Register';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
+import UsersList from '@/modules/iam/features/users/pages/UsersList';
+import UserDetails from '@/modules/iam/features/users/pages/UserDetails';
+import UserEdit from '@/modules/iam/features/users/pages/UserEdit';
+import GroupsList from '@/modules/iam/features/groups/pages/GroupsList';
+import GroupDetails from '@/modules/iam/features/groups/pages/GroupDetails';
+import GroupEdit from '@/modules/iam/features/groups/pages/GroupEdit';
+import PoliciesList from '@/modules/iam/features/policies/pages/PoliciesList';
+import PolicyDetails from '@/modules/iam/features/policies/pages/PolicyDetails';
+import PolicyEdit from '@/modules/iam/features/policies/pages/PolicyEdit';
 import { Loader2 } from 'lucide-react';
+import ReportsList from '../modules/resources/reports/pages/ReportsList';
+import ReportDetails from '../modules/resources/reports/pages/ReportDetails';
+import ManageReport from '../modules/resources/reports/pages/ManageReport';
+import AlertsList from '../modules/resources/alerts/pages/AlertsList';
+import AlertDetails from '../modules/resources/alerts/pages/AlertDetails';
+import ManageAlert from '../modules/resources/alerts/pages/ManageAlert';
+import SettingsList from '../modules/resources/settings/pages/SettingsList';
+import AuditList from '../modules/resources/audit/pages/AuditList';
 
 export function AppRoutes() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -53,6 +61,47 @@ export function AppRoutes() {
         <Route path="policies" element={<PoliciesList />} />
         <Route path="policies/:id" element={<PolicyDetails />} />
         <Route path="policies/:id/edit" element={<PolicyEdit />} />
+      </Route>
+
+      {/* Protected Resources Routes */}
+      <Route
+        path="/reports"
+        element={
+          isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" replace />
+        }
+      >
+        <Route index element={<ReportsList />} />
+        <Route path=":id" element={<ReportDetails />} />
+        <Route path=":id/edit" element={<ManageReport />} />
+      </Route>
+
+      <Route
+        path="/alerts"
+        element={
+          isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" replace />
+        }
+      >
+        <Route index element={<AlertsList />} />
+        <Route path=":id" element={<AlertDetails />} />
+        <Route path=":id/edit" element={<ManageAlert />} />
+      </Route>
+
+      <Route
+        path="/settings"
+        element={
+          isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" replace />
+        }
+      >
+        <Route index element={<SettingsList />} />
+      </Route>
+
+      <Route
+        path="/audit"
+        element={
+          isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" replace />
+        }
+      >
+        <Route index element={<AuditList />} />
       </Route>
 
       {/* Redirects */}

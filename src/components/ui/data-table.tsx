@@ -34,6 +34,7 @@ interface DataTableProps<T> {
   pagination?: PaginationState;
   onPageChange?: (page: number) => void;
   keyExtractor: (item: T) => string | number;
+  maxHeight?: string;
 }
 
 export function DataTable<T>({
@@ -44,12 +45,13 @@ export function DataTable<T>({
   pagination,
   onPageChange,
   keyExtractor,
+  maxHeight,
 }: DataTableProps<T>) {
   return (
     <div className="w-full space-y-4">
       {/* Table Container - Rounded, borders, shadow */}
       <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden dark:border-slate-800 dark:bg-slate-950">
-        <div className="w-full overflow-x-auto">
+        <div className={`w-full overflow-auto ${maxHeight || ""}`}>
           <Table>
             <TableHeader className="bg-slate-50/50 dark:bg-slate-900/50 sticky top-0 z-10 backdrop-blur-sm">
               <TableRow className="hover:bg-transparent border-b-slate-200 dark:border-b-slate-800">

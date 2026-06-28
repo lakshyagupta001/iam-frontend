@@ -1,9 +1,9 @@
 import { createContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { authApi } from '../api/auth.api';
-import type { UserProfile } from '../api/auth.api';
-import { usersApi } from '../api/users.api';
-import { axiosClient } from '../api/axiosClient';
+import { authApi } from '@/modules/auth/services/auth.service';
+import type { UserProfile } from '@/modules/auth/services/auth.service';
+import { usersApi } from '@/modules/iam/features/users/services/users.service';
+import { axiosClient } from '@/api/axiosClient';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 

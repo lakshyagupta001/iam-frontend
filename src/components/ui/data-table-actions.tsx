@@ -1,4 +1,4 @@
-import { PermissionButton } from "../iam/PermissionButton";
+import { PermissionButton } from '@/modules/iam/components/PermissionButton';
 import { Eye, Edit2, Trash2 } from "lucide-react";
 
 interface DataTableRowActionsProps {
@@ -31,7 +31,7 @@ export function DataTableRowActions({
           variant="ghost"
           size="icon"
           className="h-8 w-8 rounded-md text-slate-500 hover:text-slate-900 dark:hover:text-slate-50"
-          onClick={(e) => {
+          onClick={(e: any) => {
             e.stopPropagation();
             onView();
           }}
@@ -48,7 +48,7 @@ export function DataTableRowActions({
           variant="ghost"
           size="icon"
           className="h-8 w-8 rounded-md text-slate-500 hover:text-slate-900 dark:hover:text-slate-50"
-          onClick={(e) => {
+          onClick={(e: any) => {
             e.stopPropagation();
             onEdit();
           }}
@@ -65,7 +65,7 @@ export function DataTableRowActions({
           variant="ghost"
           size="icon"
           className="h-8 w-8 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50"
-          onClick={(e) => {
+          onClick={(e: any) => {
             e.stopPropagation();
             onDelete();
           }}
