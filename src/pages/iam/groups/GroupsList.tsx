@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../..
 import { DataTable } from '../../../components/ui/data-table';
 import { DataTableRowActions } from '../../../components/ui/data-table-actions';
 import { PermissionButton } from '../../../components/iam/PermissionButton';
+import { ConfirmDialog } from '../../../components/ui/confirm-dialog';
 
 export default function GroupsList() {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ export default function GroupsList() {
   const [limit] = useState(10);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [groupToDelete, setGroupToDelete] = useState<{ id: string, name: string } | null>(null);
 
   const [isCreating, setIsCreating] = useState(false);
 
@@ -150,27 +152,45 @@ export default function GroupsList() {
                 onView={() => navigate(`/iam/groups/${g.id}`)}
                 onEdit={() => navigate(`/iam/groups/${g.id}/edit`)}
                 onDelete={() => {
-                  if (window.confirm('Are you sure you want to delete this group?')) {
-                    deleteMutation.mutate(g.id, {
-                      onSuccess: () => {
-                        queryClient.invalidateQueries({ queryKey: ['groups'] });
-                        toast.success('Group deleted successfully', { id: 'group-delete-success' });
-                      },
-                      onError: (error) => {
-                        if (axios.isAxiosError(error)) {
-                          if (error.response?.status === 403) return;
-                          toast.error(error.response?.data?.message || 'Failed to delete group', { id: 'group-delete-error' });
-                        } else {
-                          toast.error('An unexpected error occurred', { id: 'group-delete-error' });
-                        }
-                      }
-                    });
-                  }
+                  setGroupToDelete({ id: g.id, name: g.name });
                 }}
               />
             ),
           }
         ]}
+      />
+
+      <ConfirmDialog
+        open={!!groupToDelete}
+        onOpenChange={(open) => !open && setGroupToDelete(null)}
+        title="Delete Group"
+        description={<>Are you sure you want to delete the group <strong>{groupToDelete?.name}</strong>? This action cannot be undone.</>}
+        confirmText="Delete"
+        destructive={true}
+        isConfirming={deleteMutation.isPending}
+        onConfirm={() => {
+          if (groupToDelete) {
+            deleteMutation.mutate(groupToDelete.id, {
+              onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ['groups'] });
+                toast.success('Group deleted successfully', { id: 'group-delete-success' });
+                setGroupToDelete(null);
+              },
+              onError: (error) => {
+                if (axios.isAxiosError(error)) {
+                  if (error.response?.status === 403) {
+                    setGroupToDelete(null);
+                    return;
+                  }
+                  toast.error(error.response?.data?.message || 'Failed to delete group', { id: 'group-delete-error' });
+                } else {
+                  toast.error('An unexpected error occurred', { id: 'group-delete-error' });
+                }
+                setGroupToDelete(null);
+              }
+            });
+          }
+        }}
       />
     </div>
   );

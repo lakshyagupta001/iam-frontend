@@ -71,7 +71,7 @@ export default function PolicyEdit() {
   };
 
   const addStatement = () => {
-    setStatements([...statements, { effect: 'Allow', actions: ['reports:Read'], resource: '*' }]);
+    setStatements([...statements, { effect: 'ALLOW', actions: ['reports:Read'], resource: '*' }]);
   };
 
   const removeStatement = (index: number) => {
@@ -131,7 +131,7 @@ export default function PolicyEdit() {
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Policy Type</label>
-                <Select value={type} onValueChange={(val: any) => setType(val)}>
+                <Select disabled value={type} onValueChange={(val: any) => setType(val)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
@@ -186,8 +186,8 @@ export default function PolicyEdit() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Allow">Allow</SelectItem>
-                        <SelectItem value="Deny">Deny</SelectItem>
+                        <SelectItem value="ALLOW">ALLOW</SelectItem>
+                        <SelectItem value="DENY">DENY</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

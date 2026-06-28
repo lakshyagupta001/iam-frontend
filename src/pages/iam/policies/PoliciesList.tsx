@@ -15,6 +15,7 @@ import { Input } from '../../../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select';
 import { Tooltip, TooltipTrigger, TooltipContent } from '../../../components/ui/tooltip';
 import { Button } from '../../../components/ui/button';
+import { ConfirmDialog } from '../../../components/ui/confirm-dialog';
 import type { PolicyStatement } from '../../../types';
 
 export default function PoliciesList() {
@@ -23,13 +24,14 @@ export default function PoliciesList() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [limit] = useState(10);
+  const [policyToDelete, setPolicyToDelete] = useState<{ id: string, name: string } | null>(null);
   
   const [isCreating, setIsCreating] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [type, setType] = useState<'MANAGED' | 'INLINE'>('MANAGED');
   const [statements, setStatements] = useState<PolicyStatement[]>([
-    { effect: 'Allow', actions: ['reports:Read'], resource: '*' }
+    { effect: 'ALLOW', actions: ['reports:Read'], resource: '*' }
   ]);
 
   const queryClient = useQueryClient();
@@ -59,7 +61,7 @@ export default function PoliciesList() {
         setName('');
         setDescription('');
         setType('MANAGED');
-        setStatements([{ effect: 'Allow', actions: ['reports:Read'], resource: '*' }]);
+        setStatements([{ effect: 'ALLOW', actions: ['reports:Read'], resource: '*' }]);
         toast.success('Policy created successfully', { id: 'policy-create-success' });
       },
       onError: (error) => {
@@ -79,7 +81,7 @@ export default function PoliciesList() {
   };
 
   const addStatement = () => {
-    setStatements([...statements, { effect: 'Allow', actions: ['reports:Read'], resource: '*' }]);
+    setStatements([...statements, { effect: 'ALLOW', actions: ['reports:Read'], resource: '*' }]);
   };
 
   const removeStatement = (index: number) => {
@@ -183,8 +185,8 @@ export default function PoliciesList() {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Allow">Allow</SelectItem>
-                            <SelectItem value="Deny">Deny</SelectItem>
+                            <SelectItem value="ALLOW">ALLOW</SelectItem>
+                            <SelectItem value="DENY">DENY</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -252,27 +254,45 @@ export default function PoliciesList() {
                 onView={() => navigate(`/iam/policies/${p.id}`)}
                 onEdit={() => navigate(`/iam/policies/${p.id}/edit`)}
                 onDelete={() => {
-                  if (window.confirm('Are you sure you want to delete this policy?')) {
-                    deleteMutation.mutate(p.id, {
-                      onSuccess: () => {
-                        queryClient.invalidateQueries({ queryKey: ['policies'] });
-                        toast.success('Policy deleted successfully', { id: 'policy-delete-success' });
-                      },
-                      onError: (error) => {
-                        if (axios.isAxiosError(error)) {
-                          if (error.response?.status === 403) return;
-                          toast.error(error.response?.data?.message || 'Failed to delete policy', { id: 'policy-delete-error' });
-                        } else {
-                          toast.error('An unexpected error occurred', { id: 'policy-delete-error' });
-                        }
-                      }
-                    });
-                  }
+                  setPolicyToDelete({ id: p.id, name: p.name });
                 }}
               />
             ),
           }
         ]}
+      />
+
+      <ConfirmDialog
+        open={!!policyToDelete}
+        onOpenChange={(open) => !open && setPolicyToDelete(null)}
+        title="Delete Policy"
+        description={<>Are you sure you want to delete the policy <strong>{policyToDelete?.name}</strong>? This action cannot be undone.</>}
+        confirmText="Delete"
+        destructive={true}
+        isConfirming={deleteMutation.isPending}
+        onConfirm={() => {
+          if (policyToDelete) {
+            deleteMutation.mutate(policyToDelete.id, {
+              onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ['policies'] });
+                toast.success('Policy deleted successfully', { id: 'policy-delete-success' });
+                setPolicyToDelete(null);
+              },
+              onError: (error) => {
+                if (axios.isAxiosError(error)) {
+                  if (error.response?.status === 403) {
+                    setPolicyToDelete(null);
+                    return;
+                  }
+                  toast.error(error.response?.data?.message || 'Failed to delete policy', { id: 'policy-delete-error' });
+                } else {
+                  toast.error('An unexpected error occurred', { id: 'policy-delete-error' });
+                }
+                setPolicyToDelete(null);
+              }
+            });
+          }
+        }}
       />
     </div>
   );

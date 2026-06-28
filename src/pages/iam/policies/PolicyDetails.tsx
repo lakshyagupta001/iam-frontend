@@ -82,7 +82,7 @@ export default function PolicyDetails() {
               {policy.statements.map((stmt, idx) => (
                 <div key={idx} className="border rounded-lg p-4 bg-slate-50 dark:bg-slate-900">
                   <div className="flex items-center gap-2 mb-2">
-                    <Badge variant={stmt.effect === 'Allow' ? 'default' : 'destructive'}>
+                    <Badge variant={stmt.effect === 'ALLOW' ? 'default' : 'destructive'}>
                       {stmt.effect}
                     </Badge>
                     <span className="font-semibold text-slate-700 dark:text-slate-300">Statement {idx + 1}</span>

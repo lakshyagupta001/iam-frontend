@@ -48,7 +48,7 @@ export interface Policy {
 }
 
 export interface PolicyStatement {
-  effect: 'Allow' | 'Deny';
+  effect: 'ALLOW' | 'DENY';
   actions: string[];
   resource: string[] | string;
 }
