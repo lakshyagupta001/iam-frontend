@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { PageToolbar } from '../../../components/ui/page-toolbar';
 import { PrimaryButton } from '../../../components/ui/primary-button';
 import { toast } from 'sonner';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { usersApi } from '../../../api/users.api';
+import { groupsApi } from '../../../api/groups.api';
+import { policiesApi } from '../../../api/policies.api';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { UserPlus, Loader2, UserCog } from 'lucide-react';
@@ -14,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../..
 import { Badge } from '../../../components/ui/badge';
 import { DataTable } from '../../../components/ui/data-table';
 import { DataTableRowActions } from '../../../components/ui/data-table-actions';
+import { MultiSelectDropdown } from '../../../components/ui/multi-select-dropdown';
 
 export default function UsersList() {
   const { user } = useAuth();
@@ -27,45 +30,91 @@ export default function UsersList() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
+  const [selectedPolicyIds, setSelectedPolicyIds] = useState<string[]>([]);
   const [isCreating, setIsCreating] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: paginatedData, isLoading } = useQuery({
     queryKey: ['users', { page, limit, search }],
     queryFn: () => usersApi.listUsers({ page, limit, search }),
   });
 
-  const createMutation = useMutation({
-    mutationFn: usersApi.createUser,
-    onSuccess: () => {
+  const { data: allGroupsData } = useQuery({
+    queryKey: ['groups'],
+    queryFn: () => groupsApi.listGroups({ limit: 100 }),
+    enabled: isCreating && !!user?.isRoot,
+  });
+
+  const { data: allPoliciesData } = useQuery({
+    queryKey: ['policies'],
+    queryFn: () => policiesApi.listPolicies({ limit: 100, type: 'MANAGED' }),
+    enabled: isCreating && !!user?.isRoot,
+  });
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsSubmitting(true);
+      
+      const newUser = await usersApi.createUser({ name, email, password });
+      const newUserId = newUser.id;
+      
+      const promises: Promise<any>[] = [];
+
+      if (selectedGroupIds.length > 0) {
+        selectedGroupIds.forEach(groupId => {
+          promises.push(groupsApi.addMember(groupId, newUserId));
+        });
+      }
+
+      if (selectedPolicyIds.length > 0) {
+        selectedPolicyIds.forEach(policyId => {
+          promises.push(usersApi.attachPolicy(newUserId, policyId));
+        });
+      }
+
+      if (promises.length > 0) {
+        const results = await Promise.allSettled(promises);
+        const hasFailures = results.some(r => r.status === 'rejected');
+        
+        if (hasFailures) {
+          toast.warning('User created successfully. Some groups or policies could not be assigned.');
+        } else {
+          toast.success('User created and access assigned successfully');
+        }
+      } else {
+        toast.success('User created successfully');
+      }
+
       queryClient.invalidateQueries({ queryKey: ['users'] });
       setIsCreating(false);
       setName('');
       setEmail('');
       setPassword('');
-      toast.success('User created successfully', { id: 'user-create-success' });
-    },
-    onError: (error) => {
+      setSelectedGroupIds([]);
+      setSelectedPolicyIds([]);
+    } catch (error: any) {
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 403) return;
         const errorData = error.response?.data;
         if (errorData?.errors && Array.isArray(errorData.errors)) {
-          toast.error(errorData.errors[0]?.message || 'Validation failed', { id: 'user-create-error' });
+          toast.error(errorData.errors[0]?.message || 'Validation failed');
         } else {
-          toast.error(errorData?.message || 'Failed to create user', { id: 'user-create-error' });
+          toast.error(errorData?.message || 'Failed to create user');
         }
       } else {
-        toast.error('An unexpected error occurred', { id: 'user-create-error' });
+        toast.error('An unexpected error occurred');
       }
+    } finally {
+      setIsSubmitting(false);
     }
-  });
-
-  const handleCreate = (e: React.FormEvent) => {
-    e.preventDefault();
-    createMutation.mutate({ name, email, password });
   };
 
   const users = paginatedData?.data || [];
   const pagination = paginatedData?.pagination;
+  const groupsOptions = allGroupsData?.data || [];
+  const policiesOptions = allPoliciesData?.data || [];
 
   return (
     <div className="space-y-6">
@@ -94,27 +143,51 @@ export default function UsersList() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleCreate} className="space-y-4">
+            <form onSubmit={handleCreate} className="space-y-6">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div className="space-y-2">
                   <label className="text-sm font-medium leading-none">Name</label>
-                  <Input required placeholder="John Doe" value={name} onChange={e => setName(e.target.value)} />
+                  <Input required placeholder="John Doe" value={name} onChange={e => setName(e.target.value)} disabled={isSubmitting} />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium leading-none">Email</label>
-                  <Input required type="email" placeholder="john@example.com" value={email} onChange={e => setEmail(e.target.value)} />
+                  <Input required type="email" placeholder="john@example.com" value={email} onChange={e => setEmail(e.target.value)} disabled={isSubmitting} />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium leading-none">Password</label>
-                  <Input required type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} />
+                  <Input required type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} disabled={isSubmitting} />
                 </div>
               </div>
-              <div className="flex justify-end pt-2">
-                <Button type="button" variant="ghost" className="mr-2" onClick={() => setIsCreating(false)}>
+              
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none text-slate-700 dark:text-slate-300">Assign Groups (Optional)</label>
+                  <MultiSelectDropdown 
+                    options={groupsOptions} 
+                    selectedIds={selectedGroupIds} 
+                    onChange={setSelectedGroupIds} 
+                    placeholder="Select groups..."
+                    searchPlaceholder="Search groups..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium leading-none text-slate-700 dark:text-slate-300">Attach Policies (Optional)</label>
+                  <MultiSelectDropdown 
+                    options={policiesOptions} 
+                    selectedIds={selectedPolicyIds} 
+                    onChange={setSelectedPolicyIds} 
+                    placeholder="Select policies..."
+                    searchPlaceholder="Search policies..."
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4">
+                <Button type="button" variant="ghost" className="mr-2" onClick={() => setIsCreating(false)} disabled={isSubmitting}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={createMutation.isPending}>
-                  {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Create User
                 </Button>
               </div>
