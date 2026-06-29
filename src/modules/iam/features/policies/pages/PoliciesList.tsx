@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PageToolbar } from '@/components/ui/page-toolbar';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { policiesApi } from '@/modules/iam/features/policies/services/policies.service';
-import { Key, Plus, Loader2, Trash2 } from 'lucide-react';
+import { Key, Plus, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -15,7 +15,6 @@ import { Input } from '@/components/ui/input';
 import { PolicyStatementBuilder } from '@/modules/iam/components/PolicyStatementBuilder';
 import { PolicyJsonPreview } from '@/modules/iam/components/PolicyJsonPreview';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import type { PolicyStatement } from '@/modules/iam/types/iam.types';
@@ -88,16 +87,6 @@ export default function PoliciesList() {
 
   const removeStatement = (index: number) => {
     setStatements(statements.filter((_, i) => i !== index));
-  };
-
-  const updateStatement = (index: number, field: keyof PolicyStatement, value: any) => {
-    const newStatements = [...statements];
-    if (field === 'actions') {
-      newStatements[index][field] = value.split(',');
-    } else {
-      newStatements[index][field] = value;
-    }
-    setStatements(newStatements);
   };
 
   const policies = paginatedData?.data || [];

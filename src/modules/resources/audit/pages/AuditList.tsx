@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PageToolbar } from '@/components/ui/page-toolbar';
 import { DataTable } from '@/components/ui/data-table';
+import { DataTableRowActions } from '@/components/ui/data-table-actions';
 import { Activity, ShieldAlert, CheckCircle2, User } from 'lucide-react';
 import { useAuditLogs } from '../hooks/useAudit';
 
@@ -15,6 +17,7 @@ const getActionIcon = (action: string) => {
 };
 
 export default function AuditList() {
+  const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [limit] = useState(15);
@@ -37,7 +40,6 @@ export default function AuditList() {
           setPage(1);
         }}
       />
-
 
       <DataTable
         data={paginatedLogs}
@@ -73,19 +75,20 @@ export default function AuditList() {
             ),
           },
           {
-            header: "Details",
-            cell: (log) => (
-              <span className="text-slate-500 text-sm line-clamp-1 max-w-md">
-                {log.details || '-'}
-              </span>
-            ),
-          },
-          {
             header: "Timestamp",
             cell: (log) => (
               <span className="text-slate-500 text-sm whitespace-nowrap">
                 {new Date(log.timestamp).toLocaleString()}
               </span>
+            ),
+          },
+          {
+            header: "Actions",
+            cell: (log) => (
+              <DataTableRowActions
+                onView={() => navigate(`/audit/${log.id}`)}
+                viewAction="audit:Read"
+              />
             ),
           }
         ]}

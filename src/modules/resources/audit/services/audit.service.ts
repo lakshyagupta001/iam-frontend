@@ -7,4 +7,8 @@ export const auditService = {
     const { data } = await axiosClient.get<PaginatedResponse<AuditLog>>('/audit', { params });
     return data;
   },
+  get: async (id: string): Promise<AuditLog> => {
+    const { data } = await axiosClient.get<AuditLog>(`/audit/${id}`);
+    return data;
+  }
 };

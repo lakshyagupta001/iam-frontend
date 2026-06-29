@@ -21,6 +21,7 @@ import AlertDetails from '../modules/resources/alerts/pages/AlertDetails';
 import ManageAlert from '../modules/resources/alerts/pages/ManageAlert';
 import SettingsList from '../modules/resources/settings/pages/SettingsList';
 import AuditList from '../modules/resources/audit/pages/AuditList';
+import AuditDetails from '../modules/resources/audit/pages/AuditDetails';
 import Dashboard from '../modules/dashboard/pages/Dashboard';
 
 export function AppRoutes() {
@@ -96,14 +97,10 @@ export function AppRoutes() {
         <Route index element={<SettingsList />} />
       </Route>
 
-      <Route
-        path="/audit"
-        element={
-          isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" replace />
-        }
-      >
-        <Route index element={<AuditList />} />
-      </Route>
+        <Route path="/audit" element={isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" replace />}>
+          <Route index element={<AuditList />} />
+          <Route path=":id" element={<AuditDetails />} />
+        </Route>
 
       {/* Protected Dashboard Route */}
       <Route

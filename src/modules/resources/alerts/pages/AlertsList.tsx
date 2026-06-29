@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { PageToolbar } from '@/components/ui/page-toolbar';
-import { Button } from '@/components/ui/button';
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DataTable } from '@/components/ui/data-table';
@@ -102,12 +102,8 @@ export default function AlertsList() {
             <AlertForm 
               onSubmit={handleCreate} 
               isSubmitting={createMutation.isPending} 
+              onCancel={() => setIsCreating(false)}
             />
-            <div className="mt-4 flex justify-end">
-              <Button variant="ghost" onClick={() => setIsCreating(false)} disabled={createMutation.isPending}>
-                Cancel
-              </Button>
-            </div>
           </CardContent>
         </Card>
       )}

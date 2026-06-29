@@ -27,7 +27,7 @@ export function Header() {
     if (pathname.match(/^\/iam\/policies\/new$/)) return 'Create Policy';
     if (pathname.match(/^\/iam\/policies\/[^/]+\/edit$/)) return 'Edit Policy';
     if (pathname.startsWith('/iam/policies/')) return 'Policy Details';
-    return 'IAM Console';
+    return 'Dashboard';
   };
 
   return (

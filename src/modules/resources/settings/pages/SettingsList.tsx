@@ -7,10 +7,14 @@ import { DataTable } from '@/components/ui/data-table';
 import { Settings, Save, Loader2 } from 'lucide-react';
 import { useSettings, useUpdateSetting } from '../hooks/useSettings';
 import { PermissionButton } from '@/modules/iam/components/PermissionButton';
+import { useAuth } from '@/modules/auth/hooks/useAuth';
 import axios from 'axios';
 import type { Setting } from '../types/settings.types';
 
 export default function SettingsList() {
+  const { hasPermission } = useAuth();
+  const canUpdate = hasPermission('settings:Update');
+
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [limit] = useState(10);
@@ -58,7 +62,6 @@ export default function SettingsList() {
         }}
       />
 
-
       <DataTable
         data={paginatedSettings}
         isLoading={isLoading}
@@ -92,7 +95,7 @@ export default function SettingsList() {
                     <Input 
                       value={editValue} 
                       onChange={(e) => setEditValue(e.target.value)} 
-                      disabled={updateMutation.isPending}
+                      disabled={updateMutation.isPending || !canUpdate}
                     />
                     <PermissionButton 
                       action="settings:Update"
@@ -128,14 +131,13 @@ export default function SettingsList() {
             cell: (s) => {
               if (editingKey === s.key) return null;
               return (
-                <PermissionButton 
-                  action="settings:Update"
+                <Button 
                   variant="outline"
                   size="sm"
                   onClick={() => handleEditClick(s)}
                 >
                   Edit
-                </PermissionButton>
+                </Button>
               );
             },
           }

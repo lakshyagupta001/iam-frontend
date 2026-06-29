@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { PermissionButton } from '@/modules/iam/components/PermissionButton';
 import { useAuth } from '@/modules/auth/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2, ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { Loader2, ArrowLeft, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
@@ -81,16 +81,6 @@ export default function PolicyEdit() {
 
   const removeStatement = (index: number) => {
     setStatements(statements.filter((_, i) => i !== index));
-  };
-
-  const updateStatement = (index: number, field: keyof PolicyStatement, value: any) => {
-    const newStatements = [...statements];
-    if (field === 'actions') {
-      newStatements[index][field] = value.split(',');
-    } else {
-      newStatements[index][field] = value;
-    }
-    setStatements(newStatements);
   };
 
   if (isFetching) {

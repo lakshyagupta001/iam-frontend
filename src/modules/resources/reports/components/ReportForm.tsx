@@ -13,9 +13,10 @@ interface ReportFormProps {
   onSubmit: (data: any) => void;
   isSubmitting?: boolean;
   isUpdate?: boolean;
+  onCancel?: () => void;
 }
 
-export function ReportForm({ initialData, onSubmit, isSubmitting, isUpdate }: ReportFormProps) {
+export function ReportForm({ initialData, onSubmit, isSubmitting, isUpdate, onCancel }: ReportFormProps) {
   const schema = isUpdate ? updateReportSchema : createReportSchema;
   
   const {
@@ -39,54 +40,61 @@ export function ReportForm({ initialData, onSubmit, isSubmitting, isUpdate }: Re
   }, [initialData, reset]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="title">Title</Label>
-        <Input
-          id="title"
-          placeholder="Report Title"
-          disabled={isSubmitting}
-          aria-invalid={!!errors.title}
-          {...register('title')}
-        />
-        {errors.title && (
-          <p className="text-xs text-red-500 font-medium">{errors.title.message}</p>
-        )}
-      </div>
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="flex flex-col lg:flex-row items-start lg:items-end gap-4">
+        <div className="space-y-1.5 flex-1 w-full lg:w-auto">
+          <Label htmlFor="title">Title</Label>
+          <Input
+            id="title"
+            placeholder="Report Title"
+            disabled={isSubmitting}
+            aria-invalid={!!errors.title}
+            {...register('title')}
+          />
+          {errors.title && (
+            <p className="text-xs text-red-500 font-medium">{errors.title.message}</p>
+          )}
+        </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="description">Description (Optional)</Label>
-        <Input
-          id="description"
-          placeholder="Report Description"
-          disabled={isSubmitting}
-          aria-invalid={!!errors.description}
-          {...register('description')}
-        />
-        {errors.description && (
-          <p className="text-xs text-red-500 font-medium">{errors.description.message}</p>
-        )}
-      </div>
+        <div className="space-y-1.5 flex-1 w-full lg:w-auto">
+          <Label htmlFor="description">Description (Optional)</Label>
+          <Input
+            id="description"
+            placeholder="Report Description"
+            disabled={isSubmitting}
+            aria-invalid={!!errors.description}
+            {...register('description')}
+          />
+          {errors.description && (
+            <p className="text-xs text-red-500 font-medium">{errors.description.message}</p>
+          )}
+        </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="status">Status</Label>
-        <Input
-          id="status"
-          placeholder="ACTIVE, DRAFT, etc."
-          disabled={isSubmitting}
-          aria-invalid={!!errors.status}
-          {...register('status')}
-        />
-        {errors.status && (
-          <p className="text-xs text-red-500 font-medium">{errors.status.message}</p>
-        )}
-      </div>
+        <div className="space-y-1.5 flex-1 w-full lg:w-auto">
+          <Label htmlFor="status">Status</Label>
+          <Input
+            id="status"
+            placeholder="ACTIVE, DRAFT, etc."
+            disabled={isSubmitting}
+            aria-invalid={!!errors.status}
+            {...register('status')}
+          />
+          {errors.status && (
+            <p className="text-xs text-red-500 font-medium">{errors.status.message}</p>
+          )}
+        </div>
 
-      <div className="pt-2 flex justify-end">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isUpdate ? 'Update Report' : 'Create Report'}
-        </Button>
+        <div className="flex gap-2 w-full lg:w-auto pt-2 lg:pt-0 justify-end">
+          {onCancel && (
+            <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting}>
+              Cancel
+            </Button>
+          )}
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isUpdate ? 'Update' : 'Create'}
+          </Button>
+        </div>
       </div>
     </form>
   );
