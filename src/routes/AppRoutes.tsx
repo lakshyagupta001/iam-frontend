@@ -21,6 +21,7 @@ import AlertDetails from '../modules/resources/alerts/pages/AlertDetails';
 import ManageAlert from '../modules/resources/alerts/pages/ManageAlert';
 import SettingsList from '../modules/resources/settings/pages/SettingsList';
 import AuditList from '../modules/resources/audit/pages/AuditList';
+import Dashboard from '../modules/dashboard/pages/Dashboard';
 
 export function AppRoutes() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -35,8 +36,8 @@ export function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/login" element={isAuthenticated ? <Navigate to="/iam/users" replace /> : <Login />} />
-      <Route path="/register" element={isAuthenticated ? <Navigate to="/iam/users" replace /> : <Register />} />
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} />
+      <Route path="/register" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} />
 
       {/* Protected IAM Routes */}
       <Route
@@ -104,10 +105,19 @@ export function AppRoutes() {
         <Route index element={<AuditList />} />
       </Route>
 
+      {/* Protected Dashboard Route */}
+      <Route
+        path="/dashboard"
+        element={
+          isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" replace />
+        }
+      >
+        <Route index element={<Dashboard />} />
+      </Route>
+
       {/* Redirects */}
-      <Route path="/dashboard" element={<Navigate to="/iam/users" replace />} />
-      <Route path="/" element={<Navigate to="/iam/users" replace />} />
-      <Route path="*" element={<Navigate to="/iam/users" replace />} />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }
