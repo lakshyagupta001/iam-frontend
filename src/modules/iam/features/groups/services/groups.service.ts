@@ -8,6 +8,11 @@ export const groupsApi = {
     return data;
   },
 
+  listDelegatableGroups: async (params?: PaginationParams): Promise<PaginatedResponse<Group>> => {
+    const { data } = await axiosClient.get<PaginatedResponse<Group>>('/iam/groups/delegatable', { params });
+    return data;
+  },
+
   getGroup: async (id: string): Promise<GroupDetails> => {
     const { data } = await axiosClient.get<{ success: boolean; data: GroupDetails }>(`/iam/groups/${id}`);
     return data.data;

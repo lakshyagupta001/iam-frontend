@@ -14,6 +14,11 @@ export const policiesApi = {
     return data;
   },
 
+  listDelegatablePolicies: async (params?: PolicyQueryParams): Promise<PaginatedResponse<Policy>> => {
+    const { data } = await axiosClient.get<PaginatedResponse<Policy>>('/iam/policies/delegatable', { params });
+    return data;
+  },
+
   getPolicy: async (id: string): Promise<Policy> => {
     const { data } = await axiosClient.get<{ success: boolean; data: Policy }>(`/iam/policies/${id}`);
     return data.data;

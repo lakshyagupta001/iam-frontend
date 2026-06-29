@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 
 export interface PermissionButtonProps extends ButtonProps {
   children?: React.ReactNode;
-  action: string
+  action: string | string[]
   tooltip?: string
 }
 

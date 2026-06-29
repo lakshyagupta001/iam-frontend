@@ -8,6 +8,7 @@ import { usersApi } from '@/modules/iam/features/users/services/users.service';
 import { policiesApi } from '@/modules/iam/features/policies/services/policies.service';
 import { Button } from '@/components/ui/button';
 import { PermissionButton } from '@/modules/iam/components/PermissionButton';
+import { useAuth } from '@/modules/auth/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2, ArrowLeft, Shield, Users as UsersIcon, Plus, Edit2 } from 'lucide-react';
 import {
@@ -28,6 +29,7 @@ export default function GroupEdit() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { refreshPermissions } = useAuth();
 
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [selectedPolicy, setSelectedPolicy] = useState<string>('');
@@ -50,8 +52,8 @@ export default function GroupEdit() {
   });
 
   const { data: allPoliciesData } = useQuery({
-    queryKey: ['policies'],
-    queryFn: () => policiesApi.listPolicies({ limit: 100, type: 'MANAGED' }),
+    queryKey: ['delegatablePolicies'],
+    queryFn: () => policiesApi.listDelegatablePolicies({ limit: 100, type: 'MANAGED' }),
   });
 
   const updateGroupMutation = useMutation({
@@ -80,6 +82,7 @@ export default function GroupEdit() {
     mutationFn: (userId: string) => groupsApi.addMember(id!, userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['groups', id] });
+      refreshPermissions();
       setIsUserDialogOpen(false);
       setSelectedUser('');
       toast.success('User added to group successfully');
@@ -98,6 +101,7 @@ export default function GroupEdit() {
     mutationFn: (userId: string) => groupsApi.removeMember(id!, userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['groups', id] });
+      refreshPermissions();
       toast.success('User removed from group successfully');
     },
     onError: (error) => {
@@ -114,6 +118,7 @@ export default function GroupEdit() {
     mutationFn: (policyId: string) => groupsApi.attachPolicy(id!, policyId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['groups', id] });
+      refreshPermissions();
       setIsPolicyDialogOpen(false);
       setSelectedPolicy('');
       toast.success('Policy attached successfully');
@@ -132,6 +137,7 @@ export default function GroupEdit() {
     mutationFn: (policyId: string) => groupsApi.detachPolicy(id!, policyId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['groups', id] });
+      refreshPermissions();
       toast.success('Policy detached successfully');
     },
     onError: (error) => {
@@ -237,7 +243,7 @@ export default function GroupEdit() {
 
             <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
               <DialogTrigger asChild>
-                <PermissionButton action="iam:AddGroupMember" size="sm" variant="outline" tooltip="Add Member">
+                <PermissionButton action="iam:AddUserToGroup" size="sm" variant="outline" tooltip="Add Member">
                   <Plus className="h-4 w-4 mr-2" /> Add Member
                 </PermissionButton>
               </DialogTrigger>
@@ -249,7 +255,7 @@ export default function GroupEdit() {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="py-4">
-                  <Select value={selectedUser} onValueChange={setSelectedUser}>
+                  <Select value={selectedUser || undefined} onValueChange={setSelectedUser}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a user" />
                     </SelectTrigger>
@@ -266,7 +272,7 @@ export default function GroupEdit() {
                 <div className="flex justify-end space-x-2">
                   <Button variant="ghost" onClick={() => setIsUserDialogOpen(false)}>Cancel</Button>
                   <PermissionButton
-                    action="iam:AddGroupMember"
+                    action="iam:AddUserToGroup"
                     onClick={() => addUserMutation.mutate(selectedUser)}
                     disabled={!selectedUser || addUserMutation.isPending}
                     tooltip="Add Member"
@@ -296,7 +302,7 @@ export default function GroupEdit() {
                   header: "Actions",
                   cell: (u) => (
                     <DataTableRowActions
-                      deleteAction="iam:RemoveGroupMember"
+                      deleteAction="iam:RemoveUserFromGroup"
                       onDelete={() => removeUserMutation.mutate(u.id)}
                     />
                   ),
@@ -330,7 +336,7 @@ export default function GroupEdit() {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="py-4">
-                  <Select value={selectedPolicy} onValueChange={setSelectedPolicy}>
+                  <Select value={selectedPolicy || undefined} onValueChange={setSelectedPolicy}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a policy" />
                     </SelectTrigger>

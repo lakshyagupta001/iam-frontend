@@ -8,6 +8,7 @@ import { groupsApi } from '@/modules/iam/features/groups/services/groups.service
 import { policiesApi } from '@/modules/iam/features/policies/services/policies.service';
 import { Button } from '@/components/ui/button';
 import { PermissionButton } from '@/modules/iam/components/PermissionButton';
+import { useAuth } from '@/modules/auth/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, ArrowLeft, Shield, Users as UsersIcon, Plus, Lock } from 'lucide-react';
@@ -28,6 +29,10 @@ export default function UserEdit() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { refreshPermissions, hasPermission } = useAuth();
+
+  // Determine what the current user is allowed to do on the Manage Access page
+  const canReadBoundary = hasPermission(['iam:GetUser', 'iam:PutUserBoundary', 'iam:DeleteUserBoundary']);
 
   const [selectedGroup, setSelectedGroup] = useState<string>('');
   const [selectedPolicy, setSelectedPolicy] = useState<string>('');
@@ -42,27 +47,31 @@ export default function UserEdit() {
     enabled: !!id,
   });
 
-  const { data: boundary, isLoading: isBoundaryLoading } = useQuery({
+  const { data: boundary } = useQuery({
     queryKey: ['users', id, 'boundary'],
     queryFn: () => usersApi.getBoundary(id!),
-    enabled: !!id,
+    // Only fetch the boundary if the caller has a permission that lets the backend serve it.
+    // Without this guard, users who only have policy/group permissions would get a 403 toast.
+    enabled: !!id && canReadBoundary,
+    retry: false,
   });
 
   // Queries for the available groups and policies to add
   const { data: allGroupsData } = useQuery({
-    queryKey: ['groups'],
-    queryFn: () => groupsApi.listGroups({ limit: 100 }), // Get all for dropdown
+    queryKey: ['delegatableGroups'],
+    queryFn: () => groupsApi.listDelegatableGroups({ limit: 100 }), // Get all for dropdown
   });
 
   const { data: allPoliciesData } = useQuery({
-    queryKey: ['policies'],
-    queryFn: () => policiesApi.listPolicies({ limit: 100, type: 'MANAGED' }), // Get MANAGED only for dropdown
+    queryKey: ['delegatablePolicies'],
+    queryFn: () => policiesApi.listDelegatablePolicies({ limit: 100, type: 'MANAGED' }), // Get MANAGED only for dropdown
   });
 
   const addGroupMutation = useMutation({
     mutationFn: (groupId: string) => groupsApi.addMember(groupId, id!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users', id] });
+      refreshPermissions();
       setIsGroupDialogOpen(false);
       setSelectedGroup('');
       toast.success('User added to group successfully');
@@ -81,6 +90,7 @@ export default function UserEdit() {
     mutationFn: (groupId: string) => groupsApi.removeMember(groupId, id!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users', id] });
+      refreshPermissions();
       toast.success('User removed from group successfully');
     },
     onError: (error) => {
@@ -97,6 +107,7 @@ export default function UserEdit() {
     mutationFn: (policyId: string) => usersApi.attachPolicy(id!, policyId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users', id] });
+      refreshPermissions();
       setIsPolicyDialogOpen(false);
       setSelectedPolicy('');
       toast.success('Policy attached successfully');
@@ -115,6 +126,7 @@ export default function UserEdit() {
     mutationFn: (policyId: string) => usersApi.detachPolicy(id!, policyId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users', id] });
+      refreshPermissions();
       toast.success('Policy detached successfully');
     },
     onError: (error) => {
@@ -131,6 +143,7 @@ export default function UserEdit() {
     mutationFn: (policyId: string) => usersApi.assignBoundary(id!, policyId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users', id] });
+      refreshPermissions();
       setIsBoundaryDialogOpen(false);
       setSelectedBoundary('');
       toast.success('Permission boundary assigned successfully');
@@ -149,6 +162,7 @@ export default function UserEdit() {
     mutationFn: () => usersApi.removeBoundary(id!),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users', id] });
+      refreshPermissions();
       toast.success('Permission boundary removed successfully');
     },
     onError: (error) => {
@@ -161,7 +175,7 @@ export default function UserEdit() {
     }
   });
 
-  if (isUserLoading || isBoundaryLoading) {
+  if (isUserLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
@@ -212,7 +226,7 @@ export default function UserEdit() {
 
             <Dialog open={isGroupDialogOpen} onOpenChange={setIsGroupDialogOpen}>
               <DialogTrigger asChild>
-                <PermissionButton action="iam:AddGroupMember" size="sm" variant="outline" tooltip="Add to Group">
+                <PermissionButton action="iam:AddUserToGroup" size="sm" variant="outline" tooltip="Add to Group">
                   <Plus className="h-4 w-4 mr-2" /> Add to Group
                 </PermissionButton>
               </DialogTrigger>
@@ -224,7 +238,7 @@ export default function UserEdit() {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="py-4">
-                  <Select value={selectedGroup} onValueChange={setSelectedGroup}>
+                  <Select value={selectedGroup || undefined} onValueChange={setSelectedGroup}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a group" />
                     </SelectTrigger>
@@ -241,7 +255,7 @@ export default function UserEdit() {
                 <div className="flex justify-end space-x-2">
                   <Button variant="ghost" onClick={() => setIsGroupDialogOpen(false)}>Cancel</Button>
                   <PermissionButton
-                    action="iam:AddGroupMember"
+                    action="iam:AddUserToGroup"
                     onClick={() => addGroupMutation.mutate(selectedGroup)}
                     disabled={!selectedGroup || addGroupMutation.isPending}
                     tooltip="Add to Group"
@@ -273,7 +287,7 @@ export default function UserEdit() {
                   header: "Actions",
                   cell: (g) => (
                     <DataTableRowActions
-                      deleteAction="iam:RemoveGroupMember"
+                      deleteAction="iam:RemoveUserFromGroup"
                       onDelete={() => removeGroupMutation.mutate(g.id)}
                     />
                   ),
@@ -307,7 +321,7 @@ export default function UserEdit() {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="py-4">
-                  <Select value={selectedPolicy} onValueChange={setSelectedPolicy}>
+                  <Select value={selectedPolicy || undefined} onValueChange={setSelectedPolicy}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a policy" />
                     </SelectTrigger>
@@ -390,7 +404,7 @@ export default function UserEdit() {
                 </DialogDescription>
               </DialogHeader>
               <div className="py-4">
-                <Select value={selectedBoundary} onValueChange={setSelectedBoundary}>
+                <Select value={selectedBoundary || undefined} onValueChange={setSelectedBoundary}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a boundary policy" />
                   </SelectTrigger>

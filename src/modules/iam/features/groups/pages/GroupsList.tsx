@@ -96,25 +96,25 @@ export default function GroupsList() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleCreate} className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
+            <form onSubmit={handleCreate}>
+              <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4">
+                <div className="space-y-1.5 flex-1">
                   <label className="text-sm font-medium leading-none">Name</label>
                   <Input required placeholder="e.g. Developers" value={name} onChange={e => setName(e.target.value)} />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1.5 flex-1">
                   <label className="text-sm font-medium leading-none">Description</label>
                   <Input placeholder="Optional description..." value={description} onChange={e => setDescription(e.target.value)} />
                 </div>
-              </div>
-              <div className="flex justify-end pt-2">
-                <Button type="button" variant="ghost" className="mr-2" onClick={() => setIsCreating(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={createMutation.isPending}>
-                  {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Group
-                </Button>
+                <div className="flex gap-2">
+                  <Button type="button" variant="ghost" onClick={() => setIsCreating(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={createMutation.isPending}>
+                    {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Create Group
+                  </Button>
+                </div>
               </div>
             </form>
           </CardContent>

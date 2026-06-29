@@ -12,6 +12,8 @@ import { DataTableRowActions } from '@/components/ui/data-table-actions';
 import { PermissionButton } from '@/modules/iam/components/PermissionButton';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { PolicyStatementBuilder } from '@/modules/iam/components/PolicyStatementBuilder';
+import { PolicyJsonPreview } from '@/modules/iam/components/PolicyJsonPreview';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
@@ -119,100 +121,81 @@ export default function PoliciesList() {
       />
 
       {isCreating && (
-        <Card className="border-blue-100 shadow-md shadow-blue-500/5 dark:border-blue-900/50">
-          <CardHeader>
-            <CardTitle>Create New Policy</CardTitle>
-            <CardDescription>
-              Define access rules and permissions for users or groups.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleCreate} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Policy Name</label>
-                  <Input required value={name} onChange={e => setName(e.target.value)} placeholder="e.g. S3ReadOnlyAccess" />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="lg:col-span-8">
+            <Card className="border-blue-100 shadow-md shadow-blue-500/5 dark:border-blue-900/50">
+              <CardHeader className="flex flex-row items-center justify-between pb-4">
+                <div className="space-y-1.5">
+                  <CardTitle>Create New Policy</CardTitle>
+                  <CardDescription>
+                    Define access rules and permissions for users or groups.
+                  </CardDescription>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Policy Type</label>
-                  <Select value={type} onValueChange={(val: any) => setType(val)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="MANAGED">Managed (Reusable)</SelectItem>
-                      <SelectItem value="INLINE">Inline (Specific)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Description</label>
-                  <Input value={description} onChange={e => setDescription(e.target.value)} placeholder="Describe what this policy grants..." />
-                </div>
-              </div>
-
-              <div className="border rounded-lg bg-slate-50 p-3 space-y-3 dark:bg-slate-900/50">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium">Policy Statements</h3>
-                  <Button type="button" variant="outline" size="sm" onClick={addStatement}>
-                    <Plus className="h-4 w-4 mr-2" /> Add Statement
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={() => setIsCreating(false)}>Cancel</Button>
+                  <Button type="submit" form="create-policy-form" disabled={createMutation.isPending}>
+                    {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Save
                   </Button>
                 </div>
-
-                {statements.map((stmt, index) => (
-                  <div key={index} className="p-3 border rounded-lg bg-white relative group dark:bg-slate-950">
-                    {statements.length > 1 && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button 
-                            type="button" 
-                            variant="ghost" 
-                            size="icon" 
-                            className="absolute top-1 right-1 h-6 w-6 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/50 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => removeStatement(index)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Remove Statement</TooltipContent>
-                      </Tooltip>
-                    )}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Effect</label>
-                        <Select value={stmt.effect} onValueChange={(val: any) => updateStatement(index, 'effect', val)}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="ALLOW">ALLOW</SelectItem>
-                            <SelectItem value="DENY">DENY</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Actions (Comma-separated)</label>
-                        <Input required value={stmt.actions.join(',')} onChange={e => updateStatement(index, 'actions', e.target.value)} placeholder="e.g. s3:GetObject, s3:ListBucket" />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Resource</label>
-                        <Input required value={stmt.resource as string} onChange={e => updateStatement(index, 'resource', e.target.value)} placeholder="e.g. arn:aws:s3:::my-bucket/* or *" />
-                      </div>
+              </CardHeader>
+              <CardContent>
+                <form id="create-policy-form" onSubmit={handleCreate} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+                    <div className="space-y-1.5 md:col-span-4">
+                      <label className="text-sm font-medium">Policy Name</label>
+                      <Input required value={name} onChange={e => setName(e.target.value)} placeholder="e.g. S3ReadOnlyAccess" />
+                    </div>
+                    <div className="space-y-1.5 md:col-span-3">
+                      <label className="text-sm font-medium">Policy Type</label>
+                      <Select value={type} onValueChange={(val: any) => setType(val)}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="MANAGED">Managed (Reusable)</SelectItem>
+                          <SelectItem value="INLINE">Inline (Specific)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5 md:col-span-5">
+                      <label className="text-sm font-medium">Description</label>
+                      <Input value={description} onChange={e => setDescription(e.target.value)} placeholder="Describe what this policy grants..." />
                     </div>
                   </div>
-                ))}
-              </div>
 
-              <div className="flex justify-end pt-2">
-                <Button type="button" variant="ghost" className="mr-2" onClick={() => setIsCreating(false)}>Cancel</Button>
-                <Button type="submit" disabled={createMutation.isPending}>
-                  {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Policy
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+                  <div className="border rounded-lg bg-slate-50 p-3 space-y-3 dark:bg-slate-900/50">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-medium">Policy Statements</h3>
+                      <Button type="button" variant="outline" size="sm" onClick={addStatement}>
+                        <Plus className="h-4 w-4 mr-2" /> Add Statement
+                      </Button>
+                    </div>
+
+                    {statements.map((stmt, index) => (
+                      <PolicyStatementBuilder
+                        key={index}
+                        statement={stmt}
+                        onChange={(updated) => {
+                          const newStatements = [...statements];
+                          newStatements[index] = updated;
+                          setStatements(newStatements);
+                        }}
+                        onRemove={() => removeStatement(index)}
+                        isRemovable={statements.length > 1}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Bottom buttons removed to save vertical space */}
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+          <div className="lg:col-span-4 h-full">
+            <PolicyJsonPreview statements={statements} />
+          </div>
+        </div>
       )}
 
       <DataTable

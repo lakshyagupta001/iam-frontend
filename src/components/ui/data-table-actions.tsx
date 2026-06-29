@@ -6,9 +6,9 @@ interface DataTableRowActionsProps {
   onEdit?: () => void;
   onDelete?: () => void;
   // Let the caller specify the exact action needed, since it depends on the entity
-  viewAction?: string;
-  editAction?: string;
-  deleteAction?: string;
+  viewAction?: string | string[];
+  editAction?: string | string[];
+  deleteAction?: string | string[];
   editIcon?: React.ReactNode;
   editLabel?: string;
 }

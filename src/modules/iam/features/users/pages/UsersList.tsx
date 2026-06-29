@@ -143,24 +143,24 @@ export default function UsersList() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleCreate} className="space-y-6">
+            <form onSubmit={handleCreate} className="space-y-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <label className="text-sm font-medium leading-none">Name</label>
                   <Input required placeholder="John Doe" value={name} onChange={e => setName(e.target.value)} disabled={isSubmitting} />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <label className="text-sm font-medium leading-none">Email</label>
                   <Input required type="email" placeholder="john@example.com" value={email} onChange={e => setEmail(e.target.value)} disabled={isSubmitting} />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <label className="text-sm font-medium leading-none">Password</label>
                   <Input required type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} disabled={isSubmitting} />
                 </div>
               </div>
               
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-12 items-end pt-2 border-t border-slate-100 dark:border-slate-800">
+                <div className="space-y-1.5 sm:col-span-4">
                   <label className="text-sm font-medium leading-none text-slate-700 dark:text-slate-300">Assign Groups (Optional)</label>
                   <MultiSelectDropdown 
                     options={groupsOptions} 
@@ -170,7 +170,7 @@ export default function UsersList() {
                     searchPlaceholder="Search groups..."
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1.5 sm:col-span-4">
                   <label className="text-sm font-medium leading-none text-slate-700 dark:text-slate-300">Attach Policies (Optional)</label>
                   <MultiSelectDropdown 
                     options={policiesOptions} 
@@ -180,16 +180,15 @@ export default function UsersList() {
                     searchPlaceholder="Search policies..."
                   />
                 </div>
-              </div>
-
-              <div className="flex justify-end pt-4">
-                <Button type="button" variant="ghost" className="mr-2" onClick={() => setIsCreating(false)} disabled={isSubmitting}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Create User
-                </Button>
+                <div className="flex gap-2 sm:col-span-4 justify-end">
+                  <Button type="button" variant="ghost" onClick={() => setIsCreating(false)} disabled={isSubmitting}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Create User
+                  </Button>
+                </div>
               </div>
             </form>
           </CardContent>
@@ -223,7 +222,14 @@ export default function UsersList() {
                 onView={() => navigate(`/iam/users/${u.id}`)}
                 onEdit={() => navigate(`/iam/users/${u.id}/edit`)}
                 viewAction="iam:GetUser"
-                editAction="iam:GetUser"
+                editAction={[
+                  'iam:AddUserToGroup',
+                  'iam:RemoveUserFromGroup',
+                  'iam:AttachUserPolicy',
+                  'iam:DetachUserPolicy',
+                  'iam:PutUserBoundary',
+                  'iam:DeleteUserBoundary'
+                ]}
                 editIcon={<UserCog className="h-4 w-4" />}
                 editLabel="Manage Access"
               />

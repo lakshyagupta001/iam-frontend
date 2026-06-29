@@ -13,7 +13,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   permissions: Record<string, boolean> | null;
-  hasPermission: (action: string) => boolean;
+  hasPermission: (action: string | string[]) => boolean;
+  refreshPermissions: () => Promise<void>;
   login: (accessToken: string, user: UserProfile) => void;
   logout: () => void;
 }
@@ -153,10 +154,25 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const hasPermission = (action: string) => {
+  const hasPermission = (action: string | string[]) => {
     if (user?.isRoot) return true;
     if (!permissions) return false;
+    
+    if (Array.isArray(action)) {
+      return action.some(act => !!permissions[act]);
+    }
+    
     return !!permissions[action];
+  };
+
+  const refreshPermissions = async () => {
+    if (!user) return;
+    try {
+      const perms = await usersApi.getEffectivePermissions(user.id);
+      setPermissions(perms);
+    } catch (e) {
+      console.error('Failed to refresh permissions', e);
+    }
   };
 
   return (
@@ -167,6 +183,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       isLoading,
       permissions,
       hasPermission,
+      refreshPermissions,
       login,
       logout
     }}>
