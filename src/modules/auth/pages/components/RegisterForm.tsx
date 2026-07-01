@@ -26,9 +26,14 @@ export function RegisterForm() {
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
+    defaultValues: {
+      registrationType: 'ROOT',
+    }
   });
 
   const currentPassword = watch('password', '');
+  const registrationType = watch('registrationType', 'ROOT');
+  const isRoot = registrationType === 'ROOT';
 
   const mutation = useMutation({
     mutationFn: authApi.register,
@@ -72,24 +77,56 @@ export function RegisterForm() {
         <div className="rounded-full bg-green-100 p-3">
           <CheckCircle2 className="h-8 w-8 text-green-600" />
         </div>
-        <h3 className="text-xl font-semibold text-slate-900">Organization Created!</h3>
+        <h3 className="text-xl font-semibold text-slate-900">Registration Successful!</h3>
         <p className="text-sm text-slate-500">
-          Your organization has been successfully registered. Redirecting you to login...
+          Your account has been successfully registered. Redirecting you to login...
         </p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
       {mutation.isError && (
         <div className="rounded-md bg-red-50 p-3 text-sm text-red-600 border border-red-200">
           {getErrorMessage()}
         </div>
       )}
 
-      <div className="space-y-2">
-        <Label htmlFor="organizationName">Organization Name</Label>
+      <div className="space-y-2 pb-1">
+        <Label className="text-sm text-slate-700 font-medium">Sign Up As</Label>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <label className={cn(
+            "flex items-center space-x-3 border rounded-lg p-3 flex-1 cursor-pointer transition-all",
+            isRoot ? "border-slate-900 bg-slate-50/50 ring-1 ring-slate-900 shadow-sm" : "border-slate-200 hover:bg-slate-50 hover:border-slate-300"
+          )}>
+            <input 
+              type="radio" 
+              value="ROOT" 
+              className="accent-slate-900 w-4 h-4 cursor-pointer"
+              {...register('registrationType')}
+            />
+            <span className="text-sm font-medium text-slate-900">Root Administrator</span>
+          </label>
+          <label className={cn(
+            "flex items-center space-x-3 border rounded-lg p-3 flex-1 cursor-pointer transition-all",
+            !isRoot ? "border-slate-900 bg-slate-50/50 ring-1 ring-slate-900 shadow-sm" : "border-slate-200 hover:bg-slate-50 hover:border-slate-300"
+          )}>
+            <input 
+              type="radio" 
+              value="NORMAL" 
+              className="accent-slate-900 w-4 h-4 cursor-pointer"
+              {...register('registrationType')}
+            />
+            <span className="text-sm font-medium text-slate-900">Normal User</span>
+          </label>
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <Label htmlFor="organizationName">
+          {isRoot ? "Organization Name" : "Organization Name or ID"}
+        </Label>
         <Input
           id="organizationName"
           type="text"
@@ -99,13 +136,16 @@ export function RegisterForm() {
           aria-invalid={!!errors.organizationName}
           {...register('organizationName')}
         />
+        <p className="text-[13px] text-slate-500">
+          {isRoot ? "Creates a new organization" : "Join an existing organization"}
+        </p>
         {errors.organizationName && (
           <p className="text-xs text-red-500 font-medium">{errors.organizationName.message}</p>
         )}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="name">Root User Full Name</Label>
+      <div className="space-y-1">
+        <Label htmlFor="name">{isRoot ? "Root User Full Name" : "Full Name"}</Label>
         <Input
           id="name"
           type="text"
@@ -120,7 +160,7 @@ export function RegisterForm() {
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1">
         <Label htmlFor="email">Email</Label>
         <Input
           id="email"
@@ -136,7 +176,7 @@ export function RegisterForm() {
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1">
         <Label htmlFor="password">Password</Label>
         <div className="relative">
           <Input
@@ -158,7 +198,7 @@ export function RegisterForm() {
           </button>
         </div>
         
-        <div className="pt-2 flex flex-wrap gap-x-4 gap-y-1">
+        <div className="pt-1 flex flex-wrap gap-x-3 gap-y-1">
           <PasswordRequirement met={hasLength} text="8+" />
           <PasswordRequirement met={hasUpper} text="Upper" />
           <PasswordRequirement met={hasLower} text="Lower" />
@@ -167,7 +207,7 @@ export function RegisterForm() {
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1">
         <Label htmlFor="confirmPassword">Confirm Password</Label>
         <div className="relative">
           <Input

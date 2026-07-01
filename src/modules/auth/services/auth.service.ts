@@ -37,8 +37,8 @@ export interface MeResponse {
 export const authApi = {
   register: async (credentials: RegisterFormValues): Promise<RegisterResponse> => {
     // We send only the required fields to the backend (ignoring confirmPassword)
-    const { organizationName, name, email, password } = credentials;
-    const { data } = await axiosClient.post<RegisterResponse>('/auth/register', { organizationName, name, email, password });
+    const { organizationName, name, email, password, registrationType } = credentials;
+    const { data } = await axiosClient.post<RegisterResponse>('/auth/register', { organizationName, name, email, password, registrationType });
     return data;
   },
 

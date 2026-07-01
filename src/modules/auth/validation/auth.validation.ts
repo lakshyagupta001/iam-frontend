@@ -6,6 +6,7 @@ export const loginSchema = z.object({
 });
 
 export const registerSchema = z.object({
+  registrationType: z.enum(['ROOT', 'NORMAL']).default('ROOT'),
   organizationName: z.string().trim().min(1, 'Organization Name is required'),
   name: z.string().trim().min(1, 'Name is required'),
   email: z.string().trim().toLowerCase().email('Please enter a valid email address'),
