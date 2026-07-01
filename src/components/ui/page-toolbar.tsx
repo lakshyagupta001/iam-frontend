@@ -21,7 +21,7 @@ export function PageToolbar({
   return (
     <div 
       className={cn(
-        "flex flex-col sm:flex-row gap-4 items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800", 
+        "flex flex-row gap-4 items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800", 
         className
       )} 
       {...props}
@@ -37,7 +37,7 @@ export function PageToolbar({
       </div>
       
       {primaryAction && (
-        <div className="w-full sm:w-auto flex shrink-0">
+        <div className="w-auto flex shrink-0">
           {primaryAction}
         </div>
       )}
