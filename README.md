@@ -61,9 +61,9 @@ If you have seeded the backend using `npm run prisma:seed`, you can log in to th
 **Password for all demo accounts:** `Pass@123`
 
 - **Root Admin:** `root@changenetworks.com`
-- **Developer:** `lakshya@changenetworks.com`
-- **Manager:** `yash@changenetworks.com`
-- **Security:** `bob@changenetworks.com`
+- **User:** `lakshya@changenetworks.com`
+- **User:** `yash@changenetworks.com`
+- **User:** `rahul@changenetworks.com`
 
 ---
 
