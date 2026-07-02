@@ -5,16 +5,12 @@ export interface Alert {
   severity: string;
   organizationId: string;
   createdAt: string;
+  isAcknowledged: boolean;
+  acknowledgedAt: string | null;
 }
 
 export interface CreateAlertDTO {
   title: string;
   message: string;
   severity: string;
-}
-
-export interface UpdateAlertDTO {
-  title?: string;
-  message?: string;
-  severity?: string;
 }

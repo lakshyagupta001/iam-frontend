@@ -1,9 +1,10 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAlert } from '../hooks/useAlerts';
+import { useAlert, useAcknowledgeAlert } from '../hooks/useAlerts';
+import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Bell, Calendar, Edit, Loader2 } from 'lucide-react';
+import { ArrowLeft, Bell, Calendar, CheckCircle, Loader2 } from 'lucide-react';
 import { PermissionButton } from '@/modules/iam/components/PermissionButton';
 
 const getSeverityColor = (severity: string) => {
@@ -20,6 +21,16 @@ export default function AlertDetails() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: alert, isLoading } = useAlert(id!);
+  const acknowledgeMutation = useAcknowledgeAlert();
+
+  const handleAcknowledge = async () => {
+    try {
+      await acknowledgeMutation.mutateAsync(id!);
+      toast.success('Alert acknowledged successfully');
+    } catch (error) {
+      toast.error('Failed to acknowledge alert');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -50,12 +61,16 @@ export default function AlertDetails() {
           <p className="text-sm text-slate-500">View detailed information about this alert.</p>
         </div>
         <div className="ml-auto">
-          <PermissionButton 
-            action="alerts:Update"
-            onClick={() => navigate(`/alerts/${id}/edit`)}
-          >
-            <Edit className="h-4 w-4 mr-2" /> Edit Alert
-          </PermissionButton>
+          {!alert.isAcknowledged && (
+            <PermissionButton 
+              action="alerts:Acknowledge"
+              onClick={handleAcknowledge}
+              disabled={acknowledgeMutation.isPending}
+            >
+              <CheckCircle className="h-4 w-4 mr-2" /> 
+              {acknowledgeMutation.isPending ? 'Acknowledging...' : 'Acknowledge Alert'}
+            </PermissionButton>
+          )}
         </div>
       </div>
 
@@ -80,9 +95,17 @@ export default function AlertDetails() {
             </div>
           </div>
           
-          <div className="flex items-center gap-2 text-sm text-slate-500">
-            <Calendar className="h-4 w-4" />
-            <span>Created on {new Date(alert.createdAt).toLocaleString()}</span>
+          <div className="flex items-center gap-6 text-sm text-slate-500">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              <span>Created on {new Date(alert.createdAt).toLocaleString()}</span>
+            </div>
+            {alert.isAcknowledged && alert.acknowledgedAt && (
+              <div className="flex items-center gap-2 text-green-600">
+                <CheckCircle className="h-4 w-4" />
+                <span>Acknowledged on {new Date(alert.acknowledgedAt).toLocaleString()}</span>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

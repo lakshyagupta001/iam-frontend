@@ -1,5 +1,5 @@
 import { axiosClient } from '@/api/axiosClient';
-import type { Alert, CreateAlertDTO, UpdateAlertDTO } from '../types/alerts.types';
+import type { Alert, CreateAlertDTO } from '../types/alerts.types';
 import type { PaginatedResponse, PaginationParams } from '@/types';;
 
 export const alertsService = {
@@ -18,8 +18,8 @@ export const alertsService = {
     return data.data;
   },
 
-  update: async (id: string, payload: UpdateAlertDTO): Promise<Alert> => {
-    const { data } = await axiosClient.put<{ success: boolean; data: Alert }>(`/alerts/${id}`, payload);
+  acknowledge: async (id: string): Promise<Alert> => {
+    const { data } = await axiosClient.patch<{ success: boolean; data: Alert }>(`/alerts/${id}/acknowledge`);
     return data.data;
   },
 

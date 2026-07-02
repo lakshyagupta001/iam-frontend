@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { alertsService } from '../services/alerts.service';
-import type { CreateAlertDTO, UpdateAlertDTO } from '../types/alerts.types';
+import type { CreateAlertDTO } from '../types/alerts.types';
 
 export const alertKeys = {
   all: ['alerts'] as const,
@@ -36,14 +36,14 @@ export const useCreateAlert = () => {
   });
 };
 
-export const useUpdateAlert = () => {
+export const useAcknowledgeAlert = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateAlertDTO }) => alertsService.update(id, data),
-    onSuccess: (_, variables) => {
+    mutationFn: (id: string) => alertsService.acknowledge(id),
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: alertKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: alertKeys.detail(variables.id) });
+      queryClient.invalidateQueries({ queryKey: alertKeys.detail(id) });
     },
   });
 };

@@ -18,7 +18,7 @@ import ReportDetails from '../modules/resources/reports/pages/ReportDetails';
 import ManageReport from '../modules/resources/reports/pages/ManageReport';
 import AlertsList from '../modules/resources/alerts/pages/AlertsList';
 import AlertDetails from '../modules/resources/alerts/pages/AlertDetails';
-import ManageAlert from '../modules/resources/alerts/pages/ManageAlert';
+
 import SettingsList from '../modules/resources/settings/pages/SettingsList';
 import AuditList from '../modules/resources/audit/pages/AuditList';
 import AuditDetails from '../modules/resources/audit/pages/AuditDetails';
@@ -85,7 +85,7 @@ export function AppRoutes() {
       >
         <Route index element={<AlertsList />} />
         <Route path=":id" element={<AlertDetails />} />
-        <Route path=":id/edit" element={<ManageAlert />} />
+
       </Route>
 
       <Route

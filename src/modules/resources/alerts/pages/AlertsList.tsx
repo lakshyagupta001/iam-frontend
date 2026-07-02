@@ -147,14 +147,12 @@ export default function AlertsList() {
           {
             header: "Actions",
             cell: (a) => (
-              <DataTableRowActions
-                onView={() => navigate(`/alerts/${a.id}`)}
-                onEdit={() => navigate(`/alerts/${a.id}/edit`)}
-                onDelete={() => handleDelete(a.id)}
-                viewAction="alerts:Read"
-                editAction="alerts:Update"
-                deleteAction="alerts:Delete"
-              />
+                <DataTableRowActions
+                  onView={() => navigate(`/alerts/${a.id}`)}
+                  onDelete={() => handleDelete(a.id)}
+                  viewAction="alerts:Read"
+                  deleteAction="alerts:Delete"
+                />
             ),
           }
         ]}

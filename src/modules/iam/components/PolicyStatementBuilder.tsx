@@ -52,7 +52,7 @@ const MODULES = [
     sections: [
       {
         title: 'Alerts',
-        actions: ['alerts:List', 'alerts:Read', 'alerts:Create', 'alerts:Update', 'alerts:Acknowledge', 'alerts:Delete']
+        actions: ['alerts:List', 'alerts:Read', 'alerts:Create', 'alerts:Acknowledge', 'alerts:Delete']
       }
     ]
   },
