@@ -1,7 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RegisterForm } from './components/RegisterForm';
-import { Shield } from 'lucide-react';
+
 import { Link } from 'react-router-dom';
+
+import logo from '@/assets/changenetworks.png';
 
 export default function Register() {
   return (
@@ -9,12 +11,7 @@ export default function Register() {
       <div className="w-full max-w-md space-y-4">
         {/* Brand Logo & Name */}
         <div className="flex flex-col items-center space-y-1 text-center mb-2">
-          <div className="h-10 w-10 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg shadow-slate-900/20">
-            <Shield className="text-white h-5 w-5" />
-          </div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 mt-2">
-            IAM Console
-          </h1>
+          <img src={logo} alt="Change Networks" className="w-64 h-auto object-contain mb-3" />
           <p className="text-sm text-slate-500">
             Enterprise Identity & Access Management
           </p>

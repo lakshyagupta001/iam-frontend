@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// Create a custom axios instance
 export const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
   withCredentials: true, // Crucial for sending/receiving the HttpOnly refresh token cookie

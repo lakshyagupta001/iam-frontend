@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { Users, Shield, Key, Menu, LayoutDashboard, FileText, Bell, Settings, Activity } from 'lucide-react';
+import logo from '@/assets/changenetworks.png';
 import { cn } from '../../lib/utils';
 import { Sheet, SheetContent } from '../ui/sheet';
 import { Button } from '../ui/button';
@@ -99,8 +100,7 @@ export function Sidebar({ isCollapsed, isMobileOpen, onMobileClose, onToggle }: 
           </Tooltip>
             {!isCollapsed && (
               <div className="flex items-center gap-2 whitespace-nowrap text-slate-900 dark:text-white ml-2">
-                <Shield className="h-6 w-6 shrink-0" />
-                <span className="font-semibold text-lg">IAM Console</span>
+                <img src={logo} alt="Change Networks" className="w-44 h-auto object-contain shrink-0" />
               </div>
             )}
           </div>
@@ -119,9 +119,8 @@ export function Sidebar({ isCollapsed, isMobileOpen, onMobileClose, onToggle }: 
       <Sheet open={isMobileOpen} onOpenChange={(open) => !open && onMobileClose()}>
         <SheetContent side="left" className="flex flex-col w-[250px] sm:w-[300px] p-0">
           <div className="flex h-16 items-center border-b px-6 text-slate-900 dark:text-white">
-            <div className="flex items-center gap-2">
-              <Shield className="h-6 w-6" />
-              <span className="font-semibold text-lg">IAM Console</span>
+            <div className="flex items-center gap-2 w-full">
+              <img src={logo} alt="Change Networks" className="w-44 h-auto object-contain shrink-0" />
             </div>
           </div>
           <div className="flex-1 overflow-auto py-4">

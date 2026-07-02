@@ -41,7 +41,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         const meRes = await authApi.me();
         setUser(meRes.data);
 
-        // Fetch effective permissions
         const perms = await usersApi.getEffectivePermissions(meRes.data.id);
         setPermissions(perms);
       } catch (error) {
